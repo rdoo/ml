@@ -1,0 +1,17 @@
+{
+  "name": "ml",
+  "version": "0.0.1",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "concurrently \"tsc -w\" \"nodemon --watch build build/ml.js\""
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.54",
+    "concurrently": "^3.1.0",
+    "nodemon": "^1.11.0",
+    "typescript": "2.0.10"
+  }
+}

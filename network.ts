@@ -3,6 +3,7 @@ import { Neuron } from './neuron';
 
 export class Network {
     neurons: Neuron[] = [];
+    synapses: Synapse[] = []; // TODO uzupelnic tablice lub wymyslic inny sposob
     fitness: number = 0;
 
     constructor() {

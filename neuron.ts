@@ -5,7 +5,7 @@ export class Neuron {
     threshold: number;
     value: number = 0;
 
-    constructor(synapses: Synapse[] = [], threshold: number = 0) {
+    constructor(synapses: Synapse[] = [], threshold: number = -10000) { // TODO zmienic threshold
         this.synapses = synapses;
         this.threshold = threshold;
     }

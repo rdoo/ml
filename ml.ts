@@ -6,8 +6,8 @@ import { Species } from './species';
 export const INNOVATION: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-const NUMBER_OF_NETWORKS: number = 50;
-const NUMBER_OF_RUNS: number = 10;
+const NUMBER_OF_NETWORKS: number = 200;
+const NUMBER_OF_RUNS: number = 300;
 
 let networks: Network[] = [];
 
@@ -26,9 +26,9 @@ for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
 }
 for (let u = 0; u < NUMBER_OF_RUNS; u++) {
     if (u === NUMBER_OF_RUNS - 1) {
-        run(true);
+        run(u, true);
     } else {
-        run(false);
+        run(u, false);
     }
 }
 
@@ -38,8 +38,8 @@ console.log(bestNetwork.fitness);
 for (let w = 0; w < 10; w++) {
     const ele = getElement();
     console.log(ele);
-    networks[0].inputs[0].value = ele.i1;
-    networks[0].inputs[1].value = ele.i2;
+    bestNetwork.inputs[0].value = ele.i1;
+    bestNetwork.inputs[1].value = ele.i2;
     console.log(bestNetwork.evaluate());
 }
 
@@ -70,8 +70,8 @@ function getElement() {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-function run(notMutate: boolean) {
-    for (let i = 0; i < 1e4; i++) {
+function run(step: number, notMutate: boolean) {
+    for (let i = 0; i < 1e3; i++) {
         //console.log(i);
         for (let network of networks) {
             const el = getElement();
@@ -82,19 +82,20 @@ function run(notMutate: boolean) {
             network.fitness += abs;
         }
     }
-    console.log('po');
-    for (let network of networks) {
-        console.log(network.fitness);
-    }
+    // console.log('po');
+    // for (let network of networks) {
+    //     console.log(network.fitness);
+    // }
 
     getCulled();
-    console.log('culled');
+    console.log('culled' + step);
     for (let network of networks) {
         console.log(network.fitness);
     }
 
     if (networks[0].fitness < bestNetwork.fitness) {
-        bestNetwork = networks[0];
+        bestNetwork = crossover(networks[0], networks[0]);
+        bestNetwork.fitness = networks[0].fitness;
     }
 
     if (notMutate) {
@@ -105,8 +106,7 @@ function run(notMutate: boolean) {
         network.fitness = 0;
     }
 
-    const lengthh: number = networks.length;
-    for (let i = 0; i < lengthh; i++) {
+    while (networks.length < NUMBER_OF_NETWORKS) {
         const rnd1 = networks[Math.floor(Math.random() * networks.length)];
         const rnd2 = networks[Math.floor(Math.random() * networks.length)];
 
@@ -297,7 +297,7 @@ function getCulled() {
         return network1.fitness - network2.fitness;
     });
 
-    const numberOfGettingCulled: number = Math.floor(networks.length / 2.);
+    const numberOfGettingCulled: number = Math.floor(networks.length * 0.95);
 
-    networks.splice(numberOfGettingCulled, numberOfGettingCulled);
+    networks.splice(networks.length - numberOfGettingCulled, numberOfGettingCulled);
 }

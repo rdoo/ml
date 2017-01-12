@@ -107,4 +107,18 @@ export class Network {
             console.log('\tweight:', synapse.weight);
         }
     }
+
+    // copy() {
+    //     const copyNetwork: Network = new Network();
+
+    //     for (let neuron of this.inputs) { // moze kopiowac od tego bardziej fit?
+    //         copyNetwork.inputs.push(neuron.clone());
+    //     }
+
+    //     for (let neuron of this.hidden) {
+    //         copyNetwork.hidden.push(neuron.clone());
+    //     }
+
+    //     copyNetwork.output = this.output.clone();
+    // }
 }

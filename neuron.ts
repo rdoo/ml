@@ -7,7 +7,7 @@ export class Neuron {
     threshold: number;
     value: number = 0;
 
-    constructor(synapses: Synapse[] = [], threshold: number = -10000) { // TODO zmienic threshold
+    constructor(synapses: Synapse[] = [], threshold: number = -1000000) { // TODO zmienic threshold
         this.id = NEURON_ID_GENERATOR.value++;
         this.synapses = synapses;
         this.threshold = threshold;
@@ -27,14 +27,16 @@ export class Neuron {
             return this.value;
         }
 
+        this.value = 0;
+
         for (let synapse of this.synapses) {
             this.value += synapse.origin.getValue() * synapse.weight;
         }
 
-        if (this.value < this.threshold) {
-            this.value = 0;
-        }
+        // if (this.value < this.threshold) {
+        //     this.value = 0;
+        // }
 
-        return this.value;
+        return 2.0 / (1.0 + Math.exp(-4.9 * this.value)) - 1.0;
     }
 }

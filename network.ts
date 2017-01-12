@@ -14,29 +14,41 @@ export class Network {
     }
 
     init() {
-        const input: Neuron = new Neuron();
-        input.value = 5;
+        const input1: Neuron = new Neuron();
+        input1.value = 5;
 
-        const s1: Synapse = new Synapse(input);
-        const s2: Synapse = new Synapse(input);
+        const input2: Neuron = new Neuron();
+        input2.value = 5;
+
+        const bias: Neuron = new Neuron();
+        bias.value = 1;
+
+        const s1: Synapse = new Synapse(input1);
+        const s2: Synapse = new Synapse(input1);
+        const s3: Synapse = new Synapse(input2);
+        const s4: Synapse = new Synapse(input2);
 
         // this.synapses.push(s1);
         // this.synapses.push(s2);
 
-        const n1: Neuron = new Neuron([s1]);
-        const n2: Neuron = new Neuron([s2]);
+        const b1: Synapse = new Synapse(bias);
+        const b2: Synapse = new Synapse(bias);
 
-        this.inputs.push(input);
+        const n1: Neuron = new Neuron([s1, s3, b1]);
+        //const n2: Neuron = new Neuron([s2]);
+
+        this.inputs.push(input1);
+        this.inputs.push(input2);
+        this.inputs.push(bias);
+
         this.hidden.push(n1);
-        this.hidden.push(n2);
 
-        const s3: Synapse = new Synapse(n1);
-        const s4: Synapse = new Synapse(n2)
+        const s5: Synapse = new Synapse(n1);
 
         // this.synapses.push(s3);
         // this.synapses.push(s4);
 
-        this.output = new Neuron([s3, s4]);
+        this.output = new Neuron([s2, s4, s5, b2]);
     }
 
     evaluate(): number {
@@ -52,8 +64,8 @@ export class Network {
             for (let synapse of neuron.synapses) {
                 const rnd = Math.random();
 
-                if (Math.abs(rnd) < 0.2) {
-                    synapse.weight + rnd;
+                if (Math.abs(rnd) < 0.1) {
+                    synapse.weight = Math.random() * 36 - 18;
                 }
             }
         }
@@ -61,8 +73,8 @@ export class Network {
         for (let synapse of this.output.synapses) {
             const rnd = Math.random();
 
-            if (Math.abs(rnd) < 0.2) {
-                synapse.weight + rnd;
+            if (Math.abs(rnd) < 0.1) {
+                synapse.weight = Math.random() * 36 - 18;
             }
         }
 

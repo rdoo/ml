@@ -6,11 +6,14 @@ import { Species } from './species';
 export const INNOVATION: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-const NUMBER_OF_NETWORKS: number = 10;
+const NUMBER_OF_NETWORKS: number = 50;
+const NUMBER_OF_RUNS: number = 10;
 
 let networks: Network[] = [];
 
 const speciesArray: Species[] = [];
+
+let bestNetwork: any = { fitness: 1000000 };
 
 for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     const network: Network = new Network();
@@ -18,17 +21,103 @@ for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     NEURON_ID_GENERATOR.value = 1;
     network.init();
     networks.push(network);
-    console.log(network.evaluate());
+    //console.log(network.evaluate());
     //console.log(network.toString());
 }
+for (let u = 0; u < NUMBER_OF_RUNS; u++) {
+    if (u === NUMBER_OF_RUNS - 1) {
+        run(true);
+    } else {
+        run(false);
+    }
+}
 
-//console.log(crossover(networks[0], networks[1]).toString());
+console.log(bestNetwork.toString());
+console.log(bestNetwork.fitness);
 
-// function addToSpecies(network: Network) {
-//     for (let species of speciesArray) {
-//         for (let )
-//     }
-// }
+for (let w = 0; w < 10; w++) {
+    const ele = getElement();
+    console.log(ele);
+    networks[0].inputs[0].value = ele.i1;
+    networks[0].inputs[1].value = ele.i2;
+    console.log(bestNetwork.evaluate());
+}
+
+function getElement() {
+    const array = [
+        {
+            i1: 0,
+            i2: 0,
+            o: 0
+        },
+        {
+            i1: 0,
+            i2: 1,
+            o: 1
+        },
+        {
+            i1: 1,
+            i2: 0,
+            o: 1
+        },
+        {
+            i1: 1,
+            i2: 1,
+            o: 0
+        }
+    ];
+
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+function run(notMutate: boolean) {
+    for (let i = 0; i < 1e4; i++) {
+        //console.log(i);
+        for (let network of networks) {
+            const el = getElement();
+            network.inputs[0].value = el.i1;
+            network.inputs[1].value = el.i2;
+            const ev = network.evaluate();
+            const abs = Math.abs(ev - el.o);
+            network.fitness += abs;
+        }
+    }
+    console.log('po');
+    for (let network of networks) {
+        console.log(network.fitness);
+    }
+
+    getCulled();
+    console.log('culled');
+    for (let network of networks) {
+        console.log(network.fitness);
+    }
+
+    if (networks[0].fitness < bestNetwork.fitness) {
+        bestNetwork = networks[0];
+    }
+
+    if (notMutate) {
+        return;
+    }
+
+    for (let network of networks) {
+        network.fitness = 0;
+    }
+
+    const lengthh: number = networks.length;
+    for (let i = 0; i < lengthh; i++) {
+        const rnd1 = networks[Math.floor(Math.random() * networks.length)];
+        const rnd2 = networks[Math.floor(Math.random() * networks.length)];
+
+        networks.push(crossover(rnd1, rnd2));
+    }
+
+    for (let network of networks) {
+        network.mutate();
+    }
+
+}
 
 function crossover(n1: Network, n2: Network): Network {
     const child: Network = new Network();
@@ -201,4 +290,14 @@ function crossover(n1: Network, n2: Network): Network {
     //     }
     // }
     return child;
+}
+
+function getCulled() {
+    networks.sort((network1, network2) => {
+        return network1.fitness - network2.fitness;
+    });
+
+    const numberOfGettingCulled: number = Math.floor(networks.length / 2.);
+
+    networks.splice(numberOfGettingCulled, numberOfGettingCulled);
 }

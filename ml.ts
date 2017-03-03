@@ -3,10 +3,10 @@ import { Synapse } from './synapse';
 import { Network } from './network';
 import { Species } from './species';
 
-export const INNOVATION: any = { value: 1 };
+export const INNOVATION_GENERATOR: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasdaaaaassdsaad';
+let change = 'asdsdddasdaaaaassaaadsaad';
 
 const NUMBER_OF_NETWORKS: number = 200;
 const NUMBER_OF_RUNS: number = 1300;
@@ -19,7 +19,7 @@ let bestNetwork: any = { fitness: 1000000 };
 
 for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     const network: Network = new Network();
-    INNOVATION.value = 1;
+    INNOVATION_GENERATOR.value = 1;
     NEURON_ID_GENERATOR.value = 1;
     network.init();
     networks.push(network);
@@ -27,7 +27,7 @@ for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     //console.log(network.toString());
 }
 let u = 0;
-while (bestNetwork.fitness > 0.0001) {
+while (bestNetwork.fitness > 0.001) {
     if (u === NUMBER_OF_RUNS - 1) {
         run(u, true);
     } else {

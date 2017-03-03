@@ -1,6 +1,8 @@
 import { Synapse } from './synapse';
 import { Neuron } from './neuron';
 
+import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR } from './ml';
+
 export class Network {
     //neurons: Neuron[] = [];
     inputs: Neuron[] = [];
@@ -9,32 +11,33 @@ export class Network {
     //synapses: Synapse[] = []; // TODO uzupelnic tablice lub wymyslic inny sposob
     fitness: number = 0;
 
-    constructor() {
-
-    }
+    constructor() { }
 
     init() {
-        const input1: Neuron = new Neuron();
+        INNOVATION_GENERATOR.value = 0;
+        NEURON_ID_GENERATOR.value = 0;
+
+        const input1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
         input1.value = 5;
 
-        const input2: Neuron = new Neuron();
+        const input2: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
         input2.value = 5;
 
-        const bias: Neuron = new Neuron();
+        const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
         bias.value = 1;
 
-        const s1: Synapse = new Synapse(input1);
-        const s2: Synapse = new Synapse(input1);
-        const s3: Synapse = new Synapse(input2);
-        const s4: Synapse = new Synapse(input2);
+        const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        const s3: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
+        const s4: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
 
         // this.synapses.push(s1);
         // this.synapses.push(s2);
 
-        const b1: Synapse = new Synapse(bias);
-        const b2: Synapse = new Synapse(bias);
+        const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+        const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
 
-        const n1: Neuron = new Neuron([s1, s3, b1]);
+        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, s3, b1]);
         //const n2: Neuron = new Neuron([s2]);
 
         this.inputs.push(input1);
@@ -43,12 +46,12 @@ export class Network {
 
         this.hidden.push(n1);
 
-        const s5: Synapse = new Synapse(n1);
+        const s5: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
 
         // this.synapses.push(s3);
         // this.synapses.push(s4);
 
-        this.output = new Neuron([s2, s4, s5, b2]);
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
     }
 
     evaluate(): number {

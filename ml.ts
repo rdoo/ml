@@ -6,7 +6,7 @@ import { Species } from './species';
 export const INNOVATION: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasdaaaaasda';
+let change = 'asdsdddasdaaaaassdsaad';
 
 const NUMBER_OF_NETWORKS: number = 200;
 const NUMBER_OF_RUNS: number = 1300;
@@ -27,7 +27,7 @@ for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     //console.log(network.toString());
 }
 let u = 0;
-while (bestNetwork.fitness > 30) {
+while (bestNetwork.fitness > 0.0001) {
     if (u === NUMBER_OF_RUNS - 1) {
         run(u, true);
     } else {
@@ -38,7 +38,7 @@ while (bestNetwork.fitness > 30) {
 }
 
 console.log(bestNetwork.toString());
-console.log(bestNetwork.fitness);
+console.log('best network fitness:', bestNetwork.fitness);
 
 const possibilitiesArray = [
     {
@@ -70,38 +70,35 @@ for (let w = 0; w < possibilitiesArray.length; w++) {
     console.log(bestNetwork.evaluate());
 }
 
-function getElement() {
-    const possibilitiesArray = [
-        {
-            i1: 0,
-            i2: 0,
-            o: 0
-        },
-        {
-            i1: 0,
-            i2: 1,
-            o: 1
-        },
-        {
-            i1: 1,
-            i2: 0,
-            o: 1
-        },
-        {
-            i1: 1,
-            i2: 1,
-            o: 0
-        }
-    ];
-
-    return possibilitiesArray[Math.floor(Math.random() * possibilitiesArray.length)];
-}
-
 function run(step: number, notMutate: boolean) {
-    for (let i = 0; i < 1e3; i++) {
-        //console.log(i);
-        for (let network of networks) {
-            const el = getElement();
+
+const possibilitiesArray = [
+    {
+        i1: 0,
+        i2: 0,
+        o: 0
+    },
+    {
+        i1: 0,
+        i2: 1,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 0,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 1,
+        o: 0
+    }
+];
+
+
+    for (let network of networks) {
+        for (let uu = 0; uu < possibilitiesArray.length; uu++) {
+            const el = possibilitiesArray[uu];
             network.inputs[0].value = el.i1;
             network.inputs[1].value = el.i2;
             const ev = network.evaluate();

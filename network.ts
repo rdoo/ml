@@ -64,8 +64,8 @@ export class Network {
             for (let synapse of neuron.synapses) {
                 const rnd = Math.random();
 
-                if (Math.abs(rnd) < 0.1) {
-                    synapse.weight = Math.random() * 36 - 18;
+                if (Math.abs(rnd) < 0.05) {
+                    synapse.weight = Math.random() * 20 - 10;
                 }
             }
         }
@@ -73,8 +73,8 @@ export class Network {
         for (let synapse of this.output.synapses) {
             const rnd = Math.random();
 
-            if (Math.abs(rnd) < 0.1) {
-                synapse.weight = Math.random() * 36 - 18;
+            if (Math.abs(rnd) < 0.05) {
+                synapse.weight = Math.random() * 20 - 10;
             }
         }
 

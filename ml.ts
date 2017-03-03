@@ -6,8 +6,10 @@ import { Species } from './species';
 export const INNOVATION: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
+let change = 'asdsdddasdaaaaasda';
+
 const NUMBER_OF_NETWORKS: number = 200;
-const NUMBER_OF_RUNS: number = 300;
+const NUMBER_OF_RUNS: number = 1300;
 
 let networks: Network[] = [];
 
@@ -24,27 +26,52 @@ for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     //console.log(network.evaluate());
     //console.log(network.toString());
 }
-for (let u = 0; u < NUMBER_OF_RUNS; u++) {
+let u = 0;
+while (bestNetwork.fitness > 30) {
     if (u === NUMBER_OF_RUNS - 1) {
         run(u, true);
     } else {
         run(u, false);
     }
+
+    u++;
 }
 
 console.log(bestNetwork.toString());
 console.log(bestNetwork.fitness);
 
-for (let w = 0; w < 10; w++) {
-    const ele = getElement();
-    console.log(ele);
-    bestNetwork.inputs[0].value = ele.i1;
-    bestNetwork.inputs[1].value = ele.i2;
+const possibilitiesArray = [
+    {
+        i1: 0,
+        i2: 0,
+        o: 0
+    },
+    {
+        i1: 0,
+        i2: 1,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 0,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 1,
+        o: 0
+    }
+];
+
+for (let w = 0; w < possibilitiesArray.length; w++) {
+    console.log(possibilitiesArray[w]);
+    bestNetwork.inputs[0].value = possibilitiesArray[w].i1;
+    bestNetwork.inputs[1].value = possibilitiesArray[w].i2;
     console.log(bestNetwork.evaluate());
 }
 
 function getElement() {
-    const array = [
+    const possibilitiesArray = [
         {
             i1: 0,
             i2: 0,
@@ -67,7 +94,7 @@ function getElement() {
         }
     ];
 
-    return array[Math.floor(Math.random() * array.length)];
+    return possibilitiesArray[Math.floor(Math.random() * possibilitiesArray.length)];
 }
 
 function run(step: number, notMutate: boolean) {
@@ -88,10 +115,11 @@ function run(step: number, notMutate: boolean) {
     // }
 
     getCulled();
-    console.log('culled' + step);
-    for (let network of networks) {
-        console.log(network.fitness);
-    }
+    console.log('culled ' + step + ' ' + bestNetwork.fitness);
+    // for (let network of networks) {
+    //     console.log(network.fitness);
+    // }
+    console.log(networks[0].fitness);
 
     if (networks[0].fitness < bestNetwork.fitness) {
         bestNetwork = crossover(networks[0], networks[0]);

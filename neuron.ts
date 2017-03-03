@@ -37,6 +37,7 @@ export class Neuron {
         //     this.value = 0;
         // }
 
-        return 2.0 / (1.0 + Math.exp(-4.9 * this.value)) - 1.0;
+        //return 2.0 / (1.0 + Math.exp(-4.9 * this.value)) - 1.0;
+        return 1.0 / (1.0 + Math.exp(-4.9 * this.value));
     }
 }

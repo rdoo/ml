@@ -6,7 +6,7 @@ import { Species } from './species';
 export const INNOVATION_GENERATOR: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasaadaadada'
+let change = 'asdsdddasaaadaadadaaaa'
 const NUMBER_OF_NETWORKS: number = 200;
 const NUMBER_OF_RUNS: number = 1300;
 
@@ -274,7 +274,7 @@ function getCulled() {
         return network1.fitness - network2.fitness;
     });
 
-    const numberOfGettingCulled: number = Math.floor(networks.length * 0.80);
+    const numberOfGettingCulled: number = Math.floor(networks.length * 0.99);
 
     networks.splice(networks.length - numberOfGettingCulled, numberOfGettingCulled);
 }

@@ -15,6 +15,7 @@ export class Synapse {
     clone(neuron: Neuron): Synapse {
         const newSynapse: Synapse = new Synapse(this.innovation, neuron);
         newSynapse.weight = this.weight;
+        newSynapse.enabled = this.enabled;
 
         return newSynapse;
     }

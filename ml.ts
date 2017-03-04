@@ -6,130 +6,82 @@ import { Species } from './species';
 export const INNOVATION_GENERATOR: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasdaaaaassaaadsaad';
-
+let change = 'asdsdddasaadaadada'
 const NUMBER_OF_NETWORKS: number = 200;
 const NUMBER_OF_RUNS: number = 1300;
 
-let networks: Network[] = [];
+const networks: Network[] = [];
 
 const speciesArray: Species[] = [];
 
 let bestNetwork: any = { fitness: 1000000 };
 
+const XORArray = [
+    {
+        i1: 0,
+        i2: 0,
+        o: 0
+    },
+    {
+        i1: 0,
+        i2: 1,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 0,
+        o: 1
+    },
+    {
+        i1: 1,
+        i2: 1,
+        o: 0
+    }
+];
+
+// init
 for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
     const network: Network = new Network();
-    INNOVATION_GENERATOR.value = 1;
-    NEURON_ID_GENERATOR.value = 1;
     network.init();
     networks.push(network);
-    //console.log(network.evaluate());
-    //console.log(network.toString());
+    // segregate to species
 }
-let u = 0;
+
+// main loop
+let step: number = 0;
 while (bestNetwork.fitness > 0.001) {
-    if (u === NUMBER_OF_RUNS - 1) {
-        run(u, true);
-    } else {
-        run(u, false);
-    }
+    run();
 
-    u++;
+    step++;
 }
-
+// ending
 console.log(bestNetwork.toString());
 console.log('best network fitness:', bestNetwork.fitness);
 
-const possibilitiesArray = [
-    {
-        i1: 0,
-        i2: 0,
-        o: 0
-    },
-    {
-        i1: 0,
-        i2: 1,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 0,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 1,
-        o: 0
-    }
-];
-
-for (let w = 0; w < possibilitiesArray.length; w++) {
-    console.log(possibilitiesArray[w]);
-    bestNetwork.inputs[0].value = possibilitiesArray[w].i1;
-    bestNetwork.inputs[1].value = possibilitiesArray[w].i2;
+for (let XOR of XORArray) {
+    console.log(XOR);
+    bestNetwork.inputs[0].value = XOR.i1;
+    bestNetwork.inputs[1].value = XOR.i2;
     console.log(bestNetwork.evaluate());
 }
 
-function run(step: number, notMutate: boolean) {
-
-const possibilitiesArray = [
-    {
-        i1: 0,
-        i2: 0,
-        o: 0
-    },
-    {
-        i1: 0,
-        i2: 1,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 0,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 1,
-        o: 0
-    }
-];
-
-
+function run() {
     for (let network of networks) {
-        for (let uu = 0; uu < possibilitiesArray.length; uu++) {
-            const el = possibilitiesArray[uu];
-            network.inputs[0].value = el.i1;
-            network.inputs[1].value = el.i2;
-            const ev = network.evaluate();
-            const abs = Math.abs(ev - el.o);
-            network.fitness += abs;
+        for (let XOR of XORArray) {
+            network.inputs[0].value = XOR.i1;
+            network.inputs[1].value = XOR.i2;
+            network.fitness += Math.abs(network.evaluate() - XOR.o);
         }
     }
-    // console.log('po');
-    // for (let network of networks) {
-    //     console.log(network.fitness);
-    // }
 
     getCulled();
-    console.log('culled ' + step + ' ' + bestNetwork.fitness);
-    // for (let network of networks) {
-    //     console.log(network.fitness);
-    // }
-    console.log(networks[0].fitness);
-
+    
     if (networks[0].fitness < bestNetwork.fitness) {
-        bestNetwork = crossover(networks[0], networks[0]);
+        bestNetwork = crossover(networks[0], networks[0]); // hack do otrzymania kopii network
         bestNetwork.fitness = networks[0].fitness;
     }
 
-    if (notMutate) {
-        return;
-    }
-
-    for (let network of networks) {
-        network.fitness = 0;
-    }
+    console.log(step + ' ' + bestNetwork.fitness);
 
     while (networks.length < NUMBER_OF_NETWORKS) {
         const rnd1 = networks[Math.floor(Math.random() * networks.length)];
@@ -322,7 +274,7 @@ function getCulled() {
         return network1.fitness - network2.fitness;
     });
 
-    const numberOfGettingCulled: number = Math.floor(networks.length * 0.95);
+    const numberOfGettingCulled: number = Math.floor(networks.length * 0.80);
 
     networks.splice(networks.length - numberOfGettingCulled, numberOfGettingCulled);
 }

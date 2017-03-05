@@ -3,13 +3,15 @@ import { Network } from './network';
 export class Species {
     representant: Network;
     networks: Network[] = [];
+    averageFitness: number = 0;
+    desiredPopulation: number = 0;
 
     constructor(representant: Network) {
         this.representant = representant;
     }
 
     inSpecies(network: Network) {
-        const threshold: number = 1.0;
+        const threshold: number = 10.0;
         const c1: number = 1.0;
         const c2: number = 1.0;
         const c3: number = 1.0;

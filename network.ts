@@ -63,11 +63,12 @@ export class Network {
     }
 
     mutate() {
+        // mutacja wag
         for (let neuron of this.hidden) {
             for (let synapse of neuron.synapses) {
                 const rnd = Math.random();
 
-                if (Math.abs(rnd) < 0.05) {
+                if (rnd < 0.05) {
                     synapse.weight = Math.random() * 20 - 10;
                 }
             }
@@ -76,10 +77,24 @@ export class Network {
         for (let synapse of this.output.synapses) {
             const rnd = Math.random();
 
-            if (Math.abs(rnd) < 0.05) {
+            if (rnd < 0.05) {
                 synapse.weight = Math.random() * 20 - 10;
             }
         }
+
+        // mutacja dodatkowych synaps
+        const rnd = Math.random();
+        if (rnd < 0.05) {
+            let mutationDone: boolean = false;
+            do {
+                const index1 = Math.floor(Math.random() * this.hidden.length + 1);
+                const index2 = Math.floor(Math.random() * this.hidden.length + 1);
+                // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest didable to enable
+                mutationDone = true;
+            } while (!mutationDone);
+        }
+
+        // to do mutacja dodatkowego neuronu
 
     }
 

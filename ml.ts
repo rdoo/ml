@@ -40,11 +40,19 @@ const XORArray = [
 ];
 
 // init
-for (let i = 0; i < NUMBER_OF_NETWORKS; i++) {
+
+const network: Network = new Network();
+network.init();
+
+const newSpecies: Species = new Species(network);
+newSpecies.representant = network;
+speciesArray.push(newSpecies);
+
+for (let i = 0; i < NUMBER_OF_NETWORKS - 1; i++) {
     const network: Network = new Network();
     network.init();
-    networks.push(network);
-    // segregate to species
+    networks.push(network); // to do usuniecia
+    newSpecies.networks.push(network);
 }
 
 // main loop

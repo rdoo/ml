@@ -4,6 +4,7 @@ export class Neuron {
     id: number;
     synapses: Synapse[];
     value: number = 0;
+    calculating: boolean = false;
 
     constructor(id: number, synapses: Synapse[] = []) { // TODO zmienic threshold
         this.id = id;
@@ -22,11 +23,19 @@ export class Neuron {
             return this.value;
         }
 
-        this.value = 0;
+        if (this.calculating === true) {
+            return this.value;
+        }
+
+        this.calculating = true;
+
+        let tempValue: number = 0;
 
         for (let synapse of this.synapses) {
-            this.value += synapse.origin.getValue() * synapse.weight;
+            tempValue += synapse.origin.getValue() * synapse.weight;
         }
+
+        this.value = tempValue;
 
         //return 2.0 / (1.0 + Math.exp(-4.9 * this.value)) - 1.0;
         return 1.0 / (1.0 + Math.exp(-4.9 * this.value));

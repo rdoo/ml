@@ -26,7 +26,7 @@ export class Network {
         const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
         bias.value = 1;
 
-        const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        //const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
         const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
         const s3: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
         const s4: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
@@ -37,8 +37,8 @@ export class Network {
         const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
         const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
 
-        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, s3, b1]);
-        //const n2: Neuron = new Neuron([s2]);
+        //const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, s3, b1]);
+        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s3, b1]);
 
         this.inputs.push(input1);
         this.inputs.push(input2);
@@ -51,11 +51,20 @@ export class Network {
         // this.synapses.push(s3);
         // this.synapses.push(s4);
 
+        //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, b2]);
         this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
     }
 
     evaluate(): number {
-        return this.output.getValue();
+        const value: number = this.output.getValue();
+
+        this.output.calculating = false;
+
+        for (let neuron of this.hidden) {
+            neuron.calculating = false;
+        }
+
+        return value;
     }
 
     countDisjoint(otherNetwork: Network): number {
@@ -86,10 +95,44 @@ export class Network {
         const rnd = Math.random();
         if (rnd < 0.05) {
             let mutationDone: boolean = false;
-            do {
-                const index1 = Math.floor(Math.random() * this.hidden.length + 1);
-                const index2 = Math.floor(Math.random() * this.hidden.length + 1);
-                // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest didable to enable
+            breakableLoop: do {
+                const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2)); // od // TODO refactor
+                const index2 = Math.floor(Math.random() * (this.hidden.length + 1)); // do
+                // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest disable to enable
+
+                let neuron1: Neuron;
+                let neuron2: Neuron;
+
+                if (index1 === this.hidden.length + 2) {
+                    neuron1 = this.output;
+                } else if (index1 < 2) {
+                    neuron1 = this.inputs[index1];
+                }
+                else {
+                    neuron1 = this.hidden[index1 - 2];
+                }
+
+                if (index2 === this.hidden.length) {
+                    neuron2 = this.output;
+                } else {
+                    neuron2 = this.hidden[index2];
+                }
+
+                for (let synapse of neuron2.synapses) {
+                    if (synapse.origin.id === neuron1.id) {
+                        if (synapse.enabled === false) {
+                            synapse.enabled = true;
+                            break;
+                        }
+                        continue breakableLoop;
+                    }
+                }
+
+                const newSynapse = new Synapse(INNOVATION_GENERATOR.value++, neuron1);
+                neuron2.synapses.push(newSynapse);
+                //console.log(newSynapse);
+                //console.log(this.toString());
+
                 mutationDone = true;
             } while (!mutationDone);
         }
@@ -103,7 +146,7 @@ export class Network {
     }
 
     toString() {
-        console.log('inputs');
+        console.log('inputs:');
         for (let neuron of this.inputs) {
             console.log('value:', neuron.value);
             for (let synapse of neuron.synapses) {
@@ -111,7 +154,7 @@ export class Network {
             }
         }
 
-        console.log('hidden');
+        console.log('hidden:');
         for (let neuron of this.hidden) {
             console.log('value:', neuron.value);
             for (let synapse of neuron.synapses) {
@@ -119,7 +162,7 @@ export class Network {
             }
         }
 
-        console.log('ouput');
+        console.log('ouput:');
         console.log('value:', this.output.value);
         for (let synapse of this.output.synapses) {
             console.log('\tweight:', synapse.weight);

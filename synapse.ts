@@ -5,7 +5,7 @@ export class Synapse {
     innovation: number;
     origin: Neuron;
     weight: number = Math.random() * 2 - 1; // TODO: sprawdzic jakie maja byc wagi;
-    enabled: boolean = false;
+    enabled: boolean = true;
 
     constructor(innovation: number, origin: Neuron) {
         this.innovation = innovation;

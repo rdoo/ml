@@ -6,7 +6,7 @@ import { Species } from './species';
 export const INNOVATION_GENERATOR: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasaaadaadadaaaaaaa'
+let change = 'asdsdddasaaadaadadaaaaaaaas'
 const NUMBER_OF_NETWORKS: number = 200;
 const NUMBER_OF_RUNS: number = 1300;
 
@@ -57,18 +57,23 @@ for (let i = 0; i < NUMBER_OF_NETWORKS - 1; i++) {
 
 // main loop
 let step: number = 0;
-while (bestNetwork.fitness > 0.001) {
+while (bestNetwork.fitness > 0.0001) {
     run();
 
     step++;
-    // if (step === 10000) {
+    // if (step === 20000) {
     //     break;
     // }
 }
 // ending
+
+for (let species of speciesArray) {
+    console.log(species.networks[0].toString());
+    console.log('ilosc', species.networks.length);
+}
+
 console.log(bestNetwork.toString());
 console.log('best network fitness:', bestNetwork.fitness);
-
 for (let XOR of XORArray) {
     console.log(XOR);
     bestNetwork.inputs[0].value = XOR.i1;
@@ -81,7 +86,7 @@ function run() {
 
     for (let species of speciesArray) { 
         for (let network of species.networks) {
-            for (let XOR of XORArray) {
+            for (let XOR of XORArray.concat(XORArray)) {
                 network.inputs[0].value = XOR.i1;
                 network.inputs[1].value = XOR.i2;
                 const val: number = Math.abs(network.evaluate() - XOR.o);
@@ -106,7 +111,7 @@ function run() {
         sumOfNewNetworks += species.desiredPopulation;
         //console.log('desired populationn', species.desiredPopulation);
     }
-    speciesArray[speciesArray.length - 1].desiredPopulation += NUMBER_OF_NETWORKS - sumOfNewNetworks; // ostatnio powstalem species dokladamy pozostajace miejsca
+    speciesArray[speciesArray.length - 1].desiredPopulation += NUMBER_OF_NETWORKS - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
 
     getCulled();
     
@@ -129,20 +134,19 @@ function run() {
             const newNetwork = crossover(rnd1, rnd2);
             newNetwork.mutate();
 
+            let speciesFound: boolean = false;
             for (let species of speciesArray) {
-                let speciesFound: boolean = false;
                 if (species.inSpecies(newNetwork)) {
                     species.networks.push(newNetwork);
                     speciesFound = true;
                     break;
                 }
+            }
 
-                if (!speciesFound) {
-                    const newSpecies: Species = new Species(newNetwork);
-                    newSpecies.networks.push(newNetwork);
-                    speciesArray.push(newSpecies);
-                    break;
-                }
+            if (!speciesFound) {
+                const newSpecies: Species = new Species(newNetwork);
+                newSpecies.networks.push(newNetwork);
+                speciesArray.push(newSpecies);
             }
 
             //networks.push();
@@ -341,7 +345,7 @@ function getCulled() {
             return network1.fitness - network2.fitness;
         });
 
-        const numberOfGettingCulled: number = Math.floor(species.networks.length * 0.8);
+        const numberOfGettingCulled: number = Math.floor(species.networks.length * 0.5);
 
         species.networks.splice(species.networks.length - numberOfGettingCulled, numberOfGettingCulled);
     }

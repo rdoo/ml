@@ -4,10 +4,15 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     context: path.join(__dirname, 'src'),
-    entry: './ml.ts',
+    entry: {
+        bundle: './index.ts',
+        worker: './ml.ts'
+    },
     output: {
         path: path.join(__dirname, 'build'),
-        filename: 'bundle.js'
+        filename: '[name].js',
+        libraryTarget: 'var',
+        library: 'ml'
     },
     resolve: {
         extensions: ['.js', '.ts']

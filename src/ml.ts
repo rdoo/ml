@@ -2,89 +2,77 @@ import { Neuron } from './neuron';
 import { Synapse } from './synapse';
 import { Network } from './network';
 import { Species } from './species';
+import { XORArray } from './xor';
+
+declare function postMessage(value?: any): any;
 
 export const INNOVATION_GENERATOR: any = { value: 1 };
 export const NEURON_ID_GENERATOR: any = { value: 1 };
 
-let change = 'asdsdddasaaadaadadaaaaaaaas'
-const NUMBER_OF_NETWORKS: number = 200;
-const NUMBER_OF_RUNS: number = 1300;
+onmessage = (event) => {
+    const runner: Runner = new Runner();
+    runner.init();
 
-//const networks: Network[] = [];
-
-const speciesArray: Species[] = [];
-
-let bestNetwork: any = { fitness: 1000000 };
-
-const XORArray = [
-    {
-        i1: 0,
-        i2: 0,
-        o: 0
-    },
-    {
-        i1: 0,
-        i2: 1,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 0,
-        o: 1
-    },
-    {
-        i1: 1,
-        i2: 1,
-        o: 0
+    while (runner.bestNetwork.fitness > 0.0001) {
+        runner.run();
     }
-];
+}
 
-// init
+export class Runner {
 
-const network: Network = new Network();
-network.init();
+NUMBER_OF_NETWORKS: number = 200;
+NUMBER_OF_RUNS: number = 1300;
 
-const newSpecies: Species = new Species(network);
-newSpecies.networks.push(network);
-speciesArray.push(newSpecies);
+speciesArray: Species[] = [];
+bestNetwork: any = { fitness: 1000000 };
 
-for (let i = 0; i < NUMBER_OF_NETWORKS - 1; i++) {
+step: number = 0;
+
+init() {
     const network: Network = new Network();
     network.init();
-    //networks.push(network); // to do usuniecia
+
+    const newSpecies: Species = new Species(network);
     newSpecies.networks.push(network);
+    this.speciesArray.push(newSpecies);
+
+    for (let i = 0; i < this.NUMBER_OF_NETWORKS - 1; i++) {
+        const network: Network = new Network();
+        network.init();
+        newSpecies.networks.push(network);
+    }
 }
 
-// main loop
-let step: number = 0;
-while (bestNetwork.fitness > 0.0001) {
-    run();
+// let step: number = 0;
+// while (bestNetwork.fitness > 0.0001) {
+//     setTimeout(() => run(), 0);
 
-    step++;
-    // if (step === 20000) {
-    //     break;
-    // }
+//     step++;
+//     // if (step === 20000) {
+//     //     break;
+//     // }
+// }
+
+printResults() {
+    for (let species of this.speciesArray) {
+        console.log(species.networks[0].toString());
+        console.log('ilosc', species.networks.length);
+    }
+
+    console.log(this.bestNetwork.toString());
+    console.log('best network fitness:', this.bestNetwork.fitness);
+    for (let XOR of XORArray) {
+        console.log(XOR);
+        this.bestNetwork.inputs[0].value = XOR.i1;
+        this.bestNetwork.inputs[1].value = XOR.i2;
+        console.log(this.bestNetwork.evaluate());
+    }
 }
-// ending
 
-for (let species of speciesArray) {
-    console.log(species.networks[0].toString());
-    console.log('ilosc', species.networks.length);
-}
-
-console.log(bestNetwork.toString());
-console.log('best network fitness:', bestNetwork.fitness);
-for (let XOR of XORArray) {
-    console.log(XOR);
-    bestNetwork.inputs[0].value = XOR.i1;
-    bestNetwork.inputs[1].value = XOR.i2;
-    console.log(bestNetwork.evaluate());
-}
-
-function run() {
+run() {
     let sumOfAverageFitnesses: number = 0;
 
-    for (let species of speciesArray) { 
+    for (let species of this.speciesArray) { 
         for (let network of species.networks) {
             for (let XOR of XORArray.concat(XORArray)) {
                 network.inputs[0].value = XOR.i1;
@@ -103,39 +91,39 @@ function run() {
 
     // todo srednia fitnessu liczymy przed ubojem czy po?
 
-    const maxNewNetworks: number = NUMBER_OF_NETWORKS - speciesArray.length;
+    const maxNewNetworks: number = this.NUMBER_OF_NETWORKS - this.speciesArray.length;
     let sumOfNewNetworks: number = 0;
 
-    for (let species of speciesArray) {
+    for (let species of this.speciesArray) {
         species.desiredPopulation = Math.floor(species.averageFitness / sumOfAverageFitnesses * maxNewNetworks) + 1; // +1 zeby zawsze byl przynajmniej 1
         sumOfNewNetworks += species.desiredPopulation;
         //console.log('desired populationn', species.desiredPopulation);
     }
-    speciesArray[speciesArray.length - 1].desiredPopulation += NUMBER_OF_NETWORKS - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
+    this.speciesArray[this.speciesArray.length - 1].desiredPopulation += this.NUMBER_OF_NETWORKS - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
 
-    getCulled();
+    this.getCulled();
     
-    for (let species of speciesArray) {
-        if (species.networks[0].fitness < bestNetwork.fitness) {
-            bestNetwork = crossover(species.networks[0], species.networks[0]); // hack do otrzymania kopii network
-            bestNetwork.fitness = species.networks[0].fitness;
+    for (let species of this.speciesArray) {
+        if (species.networks[0].fitness < this.bestNetwork.fitness) {
+            this.bestNetwork = this.crossover(species.networks[0], species.networks[0]); // hack do otrzymania kopii network
+            this.bestNetwork.fitness = species.networks[0].fitness;
         }
     }
 
-    console.log(step + ' ' + bestNetwork.fitness);
+    console.log(this.step + ' ' + this.bestNetwork.fitness);
 
-    console.log(speciesArray.length);
-    for (let species of speciesArray) {
+    console.log(this.speciesArray.length);
+    for (let species of this.speciesArray) {
         let speciesInitialLength: number = species.networks.length;
         while (speciesInitialLength < species.desiredPopulation) {
             const rnd1 = species.networks[Math.floor(Math.random() * species.networks.length)];
             const rnd2 = species.networks[Math.floor(Math.random() * species.networks.length)];
 
-            const newNetwork = crossover(rnd1, rnd2);
+            const newNetwork = this.crossover(rnd1, rnd2);
             newNetwork.mutate();
 
             let speciesFound: boolean = false;
-            for (let species of speciesArray) {
+            for (let species of this.speciesArray) {
                 if (species.inSpecies(newNetwork)) {
                     species.networks.push(newNetwork);
                     speciesFound = true;
@@ -146,7 +134,7 @@ function run() {
             if (!speciesFound) {
                 const newSpecies: Species = new Species(newNetwork);
                 newSpecies.networks.push(newNetwork);
-                speciesArray.push(newSpecies);
+                this.speciesArray.push(newSpecies);
             }
 
             //networks.push();
@@ -163,10 +151,12 @@ function run() {
     //         network.mutate();
     //     }
     // }
+    this.step++;
 
+    postMessage(this.step);
 }
 
-function crossover(n1: Network, n2: Network): Network {
+crossover(n1: Network, n2: Network): Network {
     const child: Network = new Network();
 
     for (let neuron of n1.inputs) { // moze kopiowac od tego bardziej fit?
@@ -339,8 +329,8 @@ function crossover(n1: Network, n2: Network): Network {
     return child;
 }
 
-function getCulled() {
-    for (let species of speciesArray) {
+getCulled() {
+    for (let species of this.speciesArray) {
         species.networks.sort((network1, network2) => {
             return network1.fitness - network2.fitness;
         });
@@ -349,4 +339,6 @@ function getCulled() {
 
         species.networks.splice(species.networks.length - numberOfGettingCulled, numberOfGettingCulled);
     }
+}
+
 }

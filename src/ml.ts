@@ -13,24 +13,29 @@ onmessage = (event) => {
     const runner: Runner = new Runner();
     runner.init();
 
-    while (runner.bestNetwork.fitness > 0.0001) {
+    while (runner.bestNetwork.fitness > 0.01) {
         runner.run();
     }
+
+    runner.printResults();
 }
 
 export class Runner {
 
-NUMBER_OF_NETWORKS: number = 200;
+NUMBER_OF_NETWORKS: number = 300;
 NUMBER_OF_RUNS: number = 1300;
 
 speciesArray: Species[] = [];
-bestNetwork: any = { fitness: 1000000 };
+bestNetwork: Network;
 
 step: number = 0;
 
 init() {
     const network: Network = new Network();
     network.init();
+
+    this.bestNetwork = this.crossover(network, network);
+    this.bestNetwork.fitness = 10000;
 
     const newSpecies: Species = new Species(network);
     newSpecies.networks.push(network);
@@ -41,6 +46,8 @@ init() {
         network.init();
         newSpecies.networks.push(network);
     }
+
+    postMessage([this.step, this.bestNetwork, this.speciesArray]);
 }
 
 // let step: number = 0;
@@ -54,35 +61,42 @@ init() {
 // }
 
 printResults() {
-    for (let species of this.speciesArray) {
-        console.log(species.networks[0].toString());
-        console.log('ilosc', species.networks.length);
-    }
+    // for (let species of this.speciesArray) {
+    //     console.log(species.networks[0].toString());
+    //     console.log('ilosc', species.networks.length);
+    // }
 
-    console.log(this.bestNetwork.toString());
-    console.log('best network fitness:', this.bestNetwork.fitness);
-    for (let XOR of XORArray) {
-        console.log(XOR);
-        this.bestNetwork.inputs[0].value = XOR.i1;
-        this.bestNetwork.inputs[1].value = XOR.i2;
-        console.log(this.bestNetwork.evaluate());
-    }
+    // console.log(this.bestNetwork.toString());
+    // console.log('best network fitness:', this.bestNetwork.fitness);
+    // for (let XOR of XORArray) {
+    //     console.log(XOR);
+    //     this.bestNetwork.inputs[0].value = XOR.i1;
+    //     this.bestNetwork.inputs[1].value = XOR.i2;
+    //     console.log(this.bestNetwork.evaluate());
+    // }
+
+    postMessage([this.step, this.bestNetwork, this.speciesArray]);
 }
 
 run() {
     let sumOfAverageFitnesses: number = 0;
 
-    for (let species of this.speciesArray) { 
+    for (let species of this.speciesArray) {
+        species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
         for (let network of species.networks) {
-            for (let XOR of XORArray.concat(XORArray)) {
-                network.inputs[0].value = XOR.i1;
-                network.inputs[1].value = XOR.i2;
-                const val: number = Math.abs(network.evaluate() - XOR.o);
-                network.fitness += val;
-                species.averageFitness += val;
+            network.fitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+            for (let i = 0; i < 100; i++) {
+                const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
+                //for (let XOR of XORArray.concat(XORArray)) { // tu powinien byc random?
+                    network.inputs[0].value = XOR.i1;
+                    network.inputs[1].value = XOR.i2;
+                    const val: number = Math.abs(network.evaluate() - XOR.o);
+                    network.fitness += val;
+                    species.averageFitness += val;
+                //}
             }
         }
-        species.averageFitness /= species.networks.length;
+        species.averageFitness = species.averageFitness / species.networks.length;
         //console.log(species.averageFitness);
         //console.log(species.networks.length);
         sumOfAverageFitnesses += species.averageFitness;
@@ -91,14 +105,22 @@ run() {
 
     // todo srednia fitnessu liczymy przed ubojem czy po?
 
+    let sumaCzastek: number = 0; // do przemyslenia i to powaznie
+
+    for (let species of this.speciesArray) {
+        species.desiredPopulation = sumOfAverageFitnesses / species.averageFitness;
+        sumaCzastek += species.desiredPopulation;
+    }
+
     const maxNewNetworks: number = this.NUMBER_OF_NETWORKS - this.speciesArray.length;
     let sumOfNewNetworks: number = 0;
 
     for (let species of this.speciesArray) {
-        species.desiredPopulation = Math.floor(species.averageFitness / sumOfAverageFitnesses * maxNewNetworks) + 1; // +1 zeby zawsze byl przynajmniej 1
+        species.desiredPopulation = Math.floor(species.desiredPopulation / sumaCzastek * maxNewNetworks) + 1; // +1 zeby zawsze byl przynajmniej 1 // 1 - zeby im wieksza fitness tym mniejsza pop
         sumOfNewNetworks += species.desiredPopulation;
         //console.log('desired populationn', species.desiredPopulation);
     }
+    //if (this.NUMBER_OF_NETWORKS - sumOfNewNetworks > 0)
     this.speciesArray[this.speciesArray.length - 1].desiredPopulation += this.NUMBER_OF_NETWORKS - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
 
     this.getCulled();
@@ -110,9 +132,11 @@ run() {
         }
     }
 
-    console.log(this.step + ' ' + this.bestNetwork.fitness);
-
-    console.log(this.speciesArray.length);
+    //console.log(this.step + ' ' + this.bestNetwork.fitness);
+    if (this.step % 100 === 0) {
+        postMessage([this.step, this.bestNetwork, this.speciesArray]);
+    }
+    //console.log(this.speciesArray.length);
     for (let species of this.speciesArray) {
         let speciesInitialLength: number = species.networks.length;
         while (speciesInitialLength < species.desiredPopulation) {
@@ -152,8 +176,6 @@ run() {
     //     }
     // }
     this.step++;
-
-    postMessage(this.step);
 }
 
 crossover(n1: Network, n2: Network): Network {
@@ -335,7 +357,7 @@ getCulled() {
             return network1.fitness - network2.fitness;
         });
 
-        const numberOfGettingCulled: number = Math.floor(species.networks.length * 0.5);
+        const numberOfGettingCulled: number = Math.floor(species.networks.length * 0.8);
 
         species.networks.splice(species.networks.length - numberOfGettingCulled, numberOfGettingCulled);
     }

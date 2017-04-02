@@ -4,8 +4,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "start": "concurrently \"tsc -w\" \"nodemon --watch build build/ml.js\"",
-    "start2": "webpack-dev-server --content-base build/"
+    "start2": "concurrently \"tsc -w\" \"nodemon --watch build build/ml.js\"",
+    "start": "webpack-dev-server --content-base build/"
   },
   "dependencies": {},
   "devDependencies": {

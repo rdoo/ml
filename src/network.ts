@@ -3,6 +3,8 @@ import { Neuron } from './neuron';
 
 import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR } from './ml';
 
+const synapseMutations: any[] = [];
+
 export class Network {
     //neurons: Neuron[] = [];
     inputs: Neuron[] = [];
@@ -13,7 +15,7 @@ export class Network {
 
     constructor() { }
 
-    init() {
+    inittrudne() {
         INNOVATION_GENERATOR.value = 0;
         NEURON_ID_GENERATOR.value = 0;
 
@@ -29,10 +31,8 @@ export class Network {
         //const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
         const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
         const s3: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
-        const s4: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
+        //const s4: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
 
-        // this.synapses.push(s1);
-        // this.synapses.push(s2);
 
         const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
         const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
@@ -48,11 +48,75 @@ export class Network {
 
         const s5: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
 
-        // this.synapses.push(s3);
-        // this.synapses.push(s4);
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);
+        //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
+    }
 
-        //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, b2]);
-        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
+    init() {
+        INNOVATION_GENERATOR.value = 0;
+        NEURON_ID_GENERATOR.value = 0;
+
+        const input1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        input1.value = 5;
+
+        const input2: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        input2.value = 5;
+
+        const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        bias.value = 1;
+
+        const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+        const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+
+        const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, b1]);
+
+        this.inputs.push(input1);
+        this.inputs.push(input2);
+        this.inputs.push(bias);
+
+        this.hidden.push(n1);
+        //this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
+
+        const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);
+    }
+
+    initproste() {
+        INNOVATION_GENERATOR.value = 0;
+        NEURON_ID_GENERATOR.value = 0;
+
+        const input1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        input1.value = 5;
+
+        const input2: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        input2.value = 5;
+
+        const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        bias.value = 1;
+
+        const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        const s3: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
+        const s4: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input2);
+
+
+        const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+        const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+
+        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, s3, b1]);
+        //const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s3, b1]);
+
+        this.inputs.push(input1);
+        this.inputs.push(input2);
+        this.inputs.push(bias);
+
+        this.hidden.push(n1);
+
+        const s5: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
+
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, b2]);
+        //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
     }
 
     evaluate(): number {
@@ -128,8 +192,17 @@ export class Network {
                     }
                 }
 
+                for (const muta of synapseMutations) {
+                    if (muta.origin === neuron1.id && muta.target === neuron2.id) {
+                        const newSynapse = new Synapse(muta.innovation, neuron1);
+                        neuron2.synapses.push(newSynapse);
+                        break breakableLoop;
+                    }
+                }
+
                 const newSynapse = new Synapse(INNOVATION_GENERATOR.value++, neuron1);
                 neuron2.synapses.push(newSynapse);
+                synapseMutations.push({ origin: newSynapse.origin.id, target: neuron2.id, innovation: newSynapse.innovation });
                 //console.log(newSynapse);
                 //console.log(this.toString());
 
@@ -137,6 +210,7 @@ export class Network {
             } while (!mutationDone);
         }
 
+        // todo mutacha disablujaca synapsy
         // to do mutacja dodatkowego neuronu
 
     }

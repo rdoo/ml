@@ -23,6 +23,9 @@ module.exports = {
         ]
     },
     plugins: [
-        new CopyWebpackPlugin([{ from: path.join(__dirname, 'src', 'index.html') }])
+        new CopyWebpackPlugin([
+            { from: path.join(__dirname, 'src', 'index.html') },
+            { from: path.join(__dirname, 'src', 'd3.min.js') }
+        ])
     ]
 };

@@ -32,7 +32,9 @@ export class Neuron {
         let tempValue: number = 0;
 
         for (let synapse of this.synapses) {
-            tempValue += synapse.origin.getValue() * synapse.weight;
+            if (synapse.enabled) {
+                tempValue += synapse.origin.getValue() * synapse.weight;
+            }
         }
 
         this.value = tempValue;

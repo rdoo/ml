@@ -159,58 +159,62 @@ export class Network {
         const rnd = Math.random();
         if (rnd < 0.05) {
             let mutationDone: boolean = false;
-            breakableLoop: do {
-                const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2)); // od // TODO refactor
-                const index2 = Math.floor(Math.random() * (this.hidden.length + 1)); // do
-                // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest disable to enable
+            
+            const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2)); // od // TODO refactor
+            const index2 = Math.floor(Math.random() * (this.hidden.length + 1)); // do
+            // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest disable to enable
 
-                let neuron1: Neuron;
-                let neuron2: Neuron;
+            let neuron1: Neuron;
+            let neuron2: Neuron;
 
-                if (index1 === this.hidden.length + 2) {
-                    neuron1 = this.output;
-                } else if (index1 < 2) {
-                    neuron1 = this.inputs[index1];
-                }
-                else {
-                    neuron1 = this.hidden[index1 - 2];
-                }
+            if (index1 === this.hidden.length + 2) {
+                neuron1 = this.output;
+            } else if (index1 < 2) {
+                neuron1 = this.inputs[index1];
+            }
+            else {
+                neuron1 = this.hidden[index1 - 2];
+            }
 
-                if (index2 === this.hidden.length) {
-                    neuron2 = this.output;
-                } else {
-                    neuron2 = this.hidden[index2];
-                }
+            if (index2 === this.hidden.length) {
+                neuron2 = this.output;
+            } else {
+                neuron2 = this.hidden[index2];
+            }
 
-                for (let synapse of neuron2.synapses) {
-                    if (synapse.origin.id === neuron1.id) {
-                        if (synapse.enabled === false) {
-                            synapse.enabled = true;
-                            break;
-                        }
-                        continue breakableLoop;
+            // szuka czy juz nie istnieje to polaczenie i wtedy je enabluje lub disabluje
+            for (let synapse of neuron2.synapses) {
+                if (synapse.origin.id === neuron1.id) {
+                    if (synapse.enabled) {
+                        synapse.enabled = false;
+                    } else {
+                        synapse.enabled = true;
                     }
+                    mutationDone = true;
+                    break;
                 }
+            }
 
+            // szuka czy tego typu mutacja nie byla juz wykonana wczesniej i ja duplikuje
+            if (!mutationDone) {
                 for (const muta of synapseMutations) {
                     if (muta.origin === neuron1.id && muta.target === neuron2.id) {
                         const newSynapse = new Synapse(muta.innovation, neuron1);
                         neuron2.synapses.push(newSynapse);
-                        break breakableLoop;
+                        mutationDone = true;
+                        break;
                     }
                 }
+            }
 
+            // tworzy calkowicie nowa mutacje
+            if (!mutationDone) {
                 const newSynapse = new Synapse(INNOVATION_GENERATOR.value++, neuron1);
                 neuron2.synapses.push(newSynapse);
                 synapseMutations.push({ origin: newSynapse.origin.id, target: neuron2.id, innovation: newSynapse.innovation });
-                //console.log(newSynapse);
-                //console.log(this.toString());
-
-                mutationDone = true;
-            } while (!mutationDone);
+            }      
         }
 
-        // todo mutacha disablujaca synapsy
         // to do mutacja dodatkowego neuronu
 
     }

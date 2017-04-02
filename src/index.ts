@@ -162,9 +162,7 @@ const drawNetwork = (id: string, network: Network) => {
 
             let color: string = 'black';
 
-            if (!synapse.enabled) {
-                color = 'grey';
-            } else if (synapse.weight < 0) {
+            if (synapse.weight < 0) {
                 color = 'red';
             }
 
@@ -174,8 +172,12 @@ const drawNetwork = (id: string, network: Network) => {
                 color = 'blue';
             }
 
-            svg.append('line').style('stroke', color).style('stroke-width', Math.abs(synapse.weight / 2))
+            const line = svg.append('line').style('stroke', color).style('stroke-width', Math.abs(synapse.weight / 2))
                 .attr('x1', originX).attr('y1', originY).attr('x2', targetX).attr('y2', targetY);
+
+            if (!synapse.enabled) {
+                line.attr('stroke-dasharray', '1,5');
+            }
 
             svg.append('text').attr('x', (originX + targetX) / 2).attr('y', (originY + targetY) / 2 - 10).attr('font-size', 8).attr('fill', color)
                 .text(synapse.innovation + ' ' + synapse.weight.toFixed(3));
@@ -191,9 +193,7 @@ const drawNetwork = (id: string, network: Network) => {
 
         let color: string = 'black';
 
-        if (!synapse.enabled) {
-            color = 'grey';
-        } else if (synapse.weight < 0) {
+        if (synapse.weight < 0) {
             color = 'red';
         }
 
@@ -203,8 +203,12 @@ const drawNetwork = (id: string, network: Network) => {
             color = 'blue';
         }
 
-        svg.append('line').style('stroke', color).style('stroke-width', Math.abs(synapse.weight / 2))
+        const line = svg.append('line').style('stroke', color).style('stroke-width', Math.abs(synapse.weight / 2))
             .attr('x1', originX).attr('y1', originY).attr('x2', targetX).attr('y2', targetY);
+
+        if (!synapse.enabled) {
+            line.attr('stroke-dasharray', '1,5');
+        }
 
         svg.append('text').attr('x', (originX + targetX) / 2).attr('y', (originY + targetY) / 2 - 10).attr('font-size', 8).attr('fill', color)
             .text(synapse.innovation + ' ' + synapse.weight.toFixed(3));

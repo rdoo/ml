@@ -222,11 +222,11 @@ export const calcResult = () => {
     // TODO WAZNE !!!!! dodac to do globali
     function getValue(): number {
         if (this.synapses.length === 0) {
-            return this.value;
+            return this.value; // TODO przemyslec
         }
 
         if (this.calculating === true) {
-            return this.value;
+            return 1.0 / (1.0 + Math.exp(-4.9 * this.value)); // TODO przemyslec
         }
 
         this.calculating = true;
@@ -234,7 +234,9 @@ export const calcResult = () => {
         let tempValue: number = 0;
 
         for (let synapse of this.synapses) {
-            tempValue += synapse.origin.getValue() * synapse.weight;
+            if (synapse.enabled) {
+                tempValue += synapse.origin.getValue() * synapse.weight;
+            }
         }
 
         this.value = tempValue;

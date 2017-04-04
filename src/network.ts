@@ -76,7 +76,7 @@ export class Network {
         this.inputs.push(bias);
 
         this.hidden.push(n1);
-        //this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
+        this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
 
         const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
         this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);

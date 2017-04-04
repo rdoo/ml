@@ -20,11 +20,11 @@ export class Neuron {
 
     getValue(): number {
         if (this.synapses.length === 0) {
-            return this.value;
+            return this.value; // TODO przemyslec
         }
 
         if (this.calculating === true) {
-            return this.value;
+            return 1.0 / (1.0 + Math.exp(-4.9 * this.value)); // TODO przemyslec
         }
 
         this.calculating = true;

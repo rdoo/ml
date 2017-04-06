@@ -93,7 +93,10 @@ const drawNetwork = (id: string, network: Network) => {
 
     layerNumber++;
     currentNodeInLayer = 0;
-    Y_OFFSET += 100;
+
+    let y_offset_plus: boolean = true;
+    Y_OFFSET += y_offset_plus ? 50 : -50;
+    y_offset_plus = !y_offset_plus;
 
     while (calculatedNeurons.length < (network.inputs.length + network.hidden.length)) {
         for (let neuron of network.hidden) {
@@ -139,6 +142,9 @@ const drawNetwork = (id: string, network: Network) => {
 
         layerNumber++;
         currentNodeInLayer = 0;
+
+        Y_OFFSET += y_offset_plus ? 50 : -50;
+        y_offset_plus = !y_offset_plus;
 
         const x: number = layerNumber * X_MULTIPLIER + 50;
         const y: number = currentNodeInLayer * Y_MULTIPLIER + Y_OFFSET;

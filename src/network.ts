@@ -65,11 +65,12 @@ export class Network {
         const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
         bias.value = 1;
 
-        const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
-        const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+        //const b1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
+        //const b2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, bias);
 
         const s1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
-        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, b1]);
+        //const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1, b1]);
+        const n1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [s1]);
 
         this.inputs.push(input1);
         this.inputs.push(input2);
@@ -79,7 +80,8 @@ export class Network {
         this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
 
         const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
-        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);
+        //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2]);
     }
 
     initproste() {
@@ -160,20 +162,18 @@ export class Network {
         if (rnd < 0.05) {
             let mutationDone: boolean = false;
             
-            const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2)); // od // TODO refactor
-            const index2 = Math.floor(Math.random() * (this.hidden.length + 1)); // do
-            // to do obliczenia czy wybrane neurony nie maja juz takiej synapsy a jesli maja i jest disable to enable
+            const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2 + 1)); // origin +1 output +2 input +1 bias// TODO refactor
+            const index2 = Math.floor(Math.random() * (this.hidden.length + 1)); // do synapses; +1 output
 
             let neuron1: Neuron;
             let neuron2: Neuron;
 
-            if (index1 === this.hidden.length + 2) {
+            if (index1 === this.hidden.length + 3) {
                 neuron1 = this.output;
-            } else if (index1 < 2) {
+            } else if (index1 < 3) {
                 neuron1 = this.inputs[index1];
-            }
-            else {
-                neuron1 = this.hidden[index1 - 2];
+            } else {
+                neuron1 = this.hidden[index1 - 3];
             }
 
             if (index2 === this.hidden.length) {

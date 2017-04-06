@@ -11,7 +11,7 @@ export class Species {
     }
 
     inSpecies(network: Network) {
-        const threshold: number = 1.5;
+        const threshold: number = 3.5;
         const c1: number = 1.5;
         const c2: number = 1.5;
         const c3: number = 0.000000000002;

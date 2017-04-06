@@ -77,7 +77,7 @@ export class Network {
         this.inputs.push(bias);
 
         this.hidden.push(n1);
-        this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
+        //this.hidden.push(new Neuron(NEURON_ID_GENERATOR.value++, []));
 
         const s2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, n1);
         //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, b2]);
@@ -158,7 +158,7 @@ export class Network {
         }
 
         // mutacja dodatkowych synaps
-        const rnd = Math.random();
+        let rnd = Math.random();
         if (rnd < 0.05) {
             let mutationDone: boolean = false;
             
@@ -216,6 +216,33 @@ export class Network {
         }
 
         // to do mutacja dodatkowego neuronu
+        rnd = Math.random();
+        if (rnd < 0.001) {
+            const synapses: any[] = [];
+            // TODO co jesli synapse jest disabled???
+            for (let neuron of this.hidden) {
+                for (let synapse of neuron.synapses) {
+                    synapses.push({ synapse: synapse, target: neuron });
+                }
+            }
+
+            for (let synapse of this.output.synapses) {
+                synapses.push({ synapse: synapse, target: this.output });
+            }
+
+            const chosenSynapse = synapses[Math.floor(Math.random() * synapses.length)];
+
+            chosenSynapse.synapse.enabled = false;
+
+            // tODO przetrzymywac dokonane mutacje w tablicy
+            const newSynapse1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, chosenSynapse.synapse.origin);
+            const newNeuron: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [newSynapse1]);
+            this.hidden.push(newNeuron);
+
+            const newSynapse2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, newNeuron);
+
+            chosenSynapse.target.synapses.push(newSynapse2);
+        }
 
     }
 

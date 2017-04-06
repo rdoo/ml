@@ -137,6 +137,7 @@ run() {
         postMessage([this.step, this.bestNetwork, this.speciesArray]);
     }
     //console.log(this.speciesArray.length);
+    // TODO wszystkie networks trzeba przeorganizowac w nowe species????
     for (let species of this.speciesArray) {
         let speciesInitialLength: number = species.networks.length;
         while (speciesInitialLength < species.desiredPopulation) {

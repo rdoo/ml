@@ -63,14 +63,14 @@ const onMessage = (event) => {
 }
 
 const drawNetwork = (id: string, network: Network) => {
-    const X_MULTIPLIER: number = 400;
-    const Y_MULTIPLIER: number = 200;
+    const X_MULTIPLIER: number = 300;
+    const Y_MULTIPLIER: number = 100;
 
-    let Y_OFFSET: number = 100;
+    let Y_OFFSET: number = 25;
 
     const svg = d3.select('#' + id).append('svg')
-        .attr('width', 1500)
-        .attr('height', 600);
+        .attr('width', 2500)
+        .attr('height', 700);
 
     let layerNumber: number = 0;
     let currentNodeInLayer: number = 0;
@@ -86,6 +86,9 @@ const drawNetwork = (id: string, network: Network) => {
 
         svg.append('circle').attr('r', 10).style('fill', 'white').style('stroke', 'black')
             .attr('transform', 'translate(' + x + ', ' + y + ')');
+
+        svg.append('text').attr('x', x).attr('y', y + 7).attr('font-size', 8).attr('fill', 'black')
+            .text(neuron.id);
 
         calculatedNeurons.push(neuron);
         currentNodeInLayer++;
@@ -134,6 +137,9 @@ const drawNetwork = (id: string, network: Network) => {
                     svg.append('circle').attr('r', 10).style('fill', 'white').style('stroke', 'black')
                         .attr('transform', 'translate(' + x + ', ' + y + ')');
 
+                    svg.append('text').attr('x', x).attr('y', y + 7).attr('font-size', 8).attr('fill', 'black')
+                        .text(neuron.id);
+
                     calculatedNeurons.push(neuron);
                     currentNodeInLayer++;
                 }
@@ -154,6 +160,9 @@ const drawNetwork = (id: string, network: Network) => {
 
         svg.append('circle').attr('r', 10).style('fill', 'white').style('stroke', 'black')
             .attr('transform', 'translate(' + x + ', ' + y + ')');
+
+        svg.append('text').attr('x', x).attr('y', y + 7).attr('font-size', 8).attr('fill', 'black')
+            .text(network.output.id);
     }
 
     // lines

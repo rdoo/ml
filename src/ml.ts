@@ -23,7 +23,6 @@ onmessage = (event) => {
 export class Runner {
 
 NUMBER_OF_NETWORKS: number = 300;
-NUMBER_OF_RUNS: number = 1300;
 
 speciesArray: Species[] = [];
 bestNetwork: Network;
@@ -133,7 +132,7 @@ run() {
     }
 
     //console.log(this.step + ' ' + this.bestNetwork.fitness);
-    if (this.step % 100 === 0) {
+    if (this.step % 50 === 0) {
         postMessage([this.step, this.bestNetwork, this.speciesArray]);
     }
     //console.log(this.speciesArray.length);
@@ -144,7 +143,7 @@ run() {
             const rnd1 = species.networks[Math.floor(Math.random() * species.networks.length)];
             const rnd2 = species.networks[Math.floor(Math.random() * species.networks.length)];
 
-            const newNetwork = this.crossover(rnd1, rnd2);
+            const newNetwork = this.crossover2(rnd1, rnd2);
             newNetwork.mutate();
 
             let speciesFound: boolean = false;
@@ -349,6 +348,51 @@ crossover(n1: Network, n2: Network): Network {
     //         }
     //     }
     // }
+
+// todo to ponizej to test crossoveru
+    for (let neuron of child.hidden) {
+        if (neuron.synapses.length === 0) {
+
+            let numberOfSynapses = 0;
+
+            for (let neuronx of child.hidden) {
+                for (let synapsex of neuronx.synapses) {
+                    if (synapsex.origin.id === neuron.id) {
+                        numberOfSynapses++;
+                    }
+                }
+            }
+
+            for (let synapsex of child.output.synapses) {
+                if (synapsex.origin.id === neuron.id) {
+                    numberOfSynapses++;
+                }
+            }
+
+            if (numberOfSynapses === 0) {
+
+
+                const species1 = new Species(n1);
+                n1.fitness = 1;
+                species1.networks.push(n1);
+
+                const species2 = new Species(n2);
+                n2.fitness = 1;
+                species2.networks.push(n2);
+
+                child.fitness = 0;
+                const species3 = new Species(child);
+                species3.networks.push(child);
+
+                this.speciesArray = [species1, species2, species3];
+                postMessage([this.step, this.bestNetwork, this.speciesArray]);
+                console.log('elo');
+                break;
+            }
+        }
+    }
+
+
     return child;
 }
 
@@ -362,6 +406,127 @@ getCulled() {
 
         species.networks.splice(species.networks.length - numberOfGettingCulled, numberOfGettingCulled);
     }
+}
+
+crossover2(n1: Network, n2: Network): Network {
+    let moreFit: Network;
+    let lessFit: Network;
+
+    if (n1.fitness >= n2.fitness) {
+        moreFit = n1;
+        lessFit = n2;
+    } else {
+        moreFit = n2;
+        lessFit = n1;
+    }
+
+    const child: Network = new Network();
+
+    for (let neuron of moreFit.inputs) {
+        child.inputs.push(neuron.clone());
+    }
+
+    for (let neuron of moreFit.hidden) {
+        child.hidden.push(neuron.clone());
+    }
+
+    child.output = moreFit.output.clone();
+
+    for (let neuron of moreFit.hidden) {
+        for (let synapse of neuron.synapses) {
+            const synapseBeingResult = lessFit.isSynapseInHiddenWithId(synapse.innovation);
+            if (synapseBeingResult.result) {
+                const newOrigin = child.findNeuronWithId(synapse.origin.id);
+                const newHost = child.findNeuronWithId(neuron.id);
+                const newSynapse = synapse.clone(newOrigin);
+
+                const rnd: number = Math.random();
+
+                // waga jest randomowa pomiedzy synapse w moreFit i lessFit
+                if (rnd < 0.5) {
+                    newSynapse.weight = synapseBeingResult.weight;
+                }
+
+                newHost.synapses.push(newSynapse);
+            } else {
+                const newOrigin = child.findNeuronWithId(synapse.origin.id);
+                const newHost = child.findNeuronWithId(neuron.id);
+                const newSynapse = synapse.clone(newOrigin);
+                newHost.synapses.push(newSynapse);
+            }
+
+        }
+    }
+
+        for (let synapse of moreFit.output.synapses) {
+            const synapseBeingResult = lessFit.isSynapseInHiddenWithId(synapse.innovation);
+            if (synapseBeingResult.result) {
+                const newOrigin = child.findNeuronWithId(synapse.origin.id);
+                const newHost = child.findNeuronWithId(moreFit.output.id);
+                const newSynapse = synapse.clone(newOrigin);
+
+                const rnd: number = Math.random();
+
+                // waga jest randomowa pomiedzy synapse w moreFit i lessFit
+                if (rnd < 0.5) {
+                    newSynapse.weight = synapseBeingResult.weight;
+                }
+
+                newHost.synapses.push(newSynapse);
+            } else {
+                const newOrigin = child.findNeuronWithId(synapse.origin.id);
+                const newHost = child.findNeuronWithId(moreFit.output.id);
+                const newSynapse = synapse.clone(newOrigin);
+                newHost.synapses.push(newSynapse);
+            }
+
+        }
+
+
+// todo to ponizej to test crossoveru
+    for (let neuron of child.hidden) {
+        if (neuron.synapses.length === 0) {
+
+            let numberOfSynapses = 0;
+
+            for (let neuronx of child.hidden) {
+                for (let synapsex of neuronx.synapses) {
+                    if (synapsex.origin.id === neuron.id) {
+                        numberOfSynapses++;
+                    }
+                }
+            }
+
+            for (let synapsex of child.output.synapses) {
+                if (synapsex.origin.id === neuron.id) {
+                    numberOfSynapses++;
+                }
+            }
+
+            if (numberOfSynapses === 0) {
+
+
+                const species1 = new Species(n1);
+                n1.fitness = 1;
+                species1.networks.push(n1);
+
+                const species2 = new Species(n2);
+                n2.fitness = 1;
+                species2.networks.push(n2);
+
+                child.fitness = 0;
+                const species3 = new Species(child);
+                species3.networks.push(child);
+
+                this.speciesArray = [species1, species2, species3];
+                postMessage([this.step, this.bestNetwork, this.speciesArray]);
+                console.log('elo');
+                break;
+            }
+        }
+    }
+
+    return child;
 }
 
 }

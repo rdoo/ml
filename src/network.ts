@@ -137,6 +137,7 @@ export class Network {
         return 0;
     }
 
+    // TODO uniform pertrub if rnd < 0.9 then synapse.weight +- random.uniform(-3, 3)
     mutate() {
         // mutacja wag
         for (let neuron of this.hidden) {
@@ -248,6 +249,38 @@ export class Network {
 
     sameSpecies(otherNetwork: Network): boolean {
         return false;
+    }
+
+    isSynapseInHiddenWithId(id: number) {
+        for (const neuron of this.hidden) {
+            for (const synapse of neuron.synapses) {
+                if (synapse.innovation === id) {
+                    return { result: true, weight: synapse.weight };
+                }
+            }
+        }
+
+        return { result: false, weight: 0 };
+    }
+
+    findNeuronWithId(id: number) {
+        if (this.output.id === id) {
+            return this.output;
+        }
+
+        for (const neuron of this.inputs) {
+            if (neuron.id === id) {
+                return neuron;
+            }
+        }
+
+        for (const neuron of this.hidden) {
+            if (neuron.id === id) {
+                return neuron;
+            }
+        }
+
+        throw('Neuron not found!');
     }
 
     toString() {

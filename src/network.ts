@@ -50,6 +50,23 @@ export class Network {
         //this.output = new Neuron(NEURON_ID_GENERATOR.value++, [s2, s4, s5, b2]);
     }
 
+    initnull() {
+        INNOVATION_GENERATOR.value = 0;
+        NEURON_ID_GENERATOR.value = 0;
+
+        const input1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        const input2: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        bias.value = 1;
+
+        this.inputs.push(input1);
+        this.inputs.push(input2);
+        this.inputs.push(bias);
+
+        const synapse: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
+        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [synapse]);
+    }
+
     init() {
         INNOVATION_GENERATOR.value = 0;
         NEURON_ID_GENERATOR.value = 0;

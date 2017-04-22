@@ -101,7 +101,7 @@ const drawNetwork = (id: string, network: Network) => {
     Y_OFFSET += y_offset_plus ? 50 : -50;
     y_offset_plus = !y_offset_plus;
 
-    while (calculatedNeurons.length < (network.inputs.length + network.hidden.length)) {
+    do {
         for (let neuron of network.hidden) {
             if (calculatedNeurons.indexOf(neuron) === -1) { // nie ma neuronu w tablicy
                 (neuron as any).disc = 0;
@@ -163,7 +163,7 @@ const drawNetwork = (id: string, network: Network) => {
 
         svg.append('text').attr('x', x).attr('y', y + 7).attr('font-size', 8).attr('fill', 'black')
             .text(network.output.id);
-    }
+    } while (calculatedNeurons.length < (network.inputs.length + network.hidden.length));
 
     // lines
 

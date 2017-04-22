@@ -11,7 +11,7 @@ export class Species {
     }
 
     inSpecies(network: Network) {
-        const threshold: number = 3.5;
+        const threshold: number = 1.0;
         const c1: number = 1.5;
         const c2: number = 1.5;
         const c3: number = 0.000000000002;
@@ -29,16 +29,16 @@ export class Species {
             for (let synapse1 of neuron1.synapses) {
                 if (synapse1.innovation > highestInnovation1) {
                     highestInnovation1 = synapse1.innovation;
-                    numberOfSynapses1++;
                 }
+                numberOfSynapses1++;
             }
         }
 
         for (let synapse1 of this.representant.output.synapses) {
             if (synapse1.innovation > highestInnovation1) {
                 highestInnovation1 = synapse1.innovation;
-                numberOfSynapses1++;
             }
+            numberOfSynapses1++;
         }
 
         // looking for highest innovation number in other network:
@@ -49,16 +49,16 @@ export class Species {
             for (let synapse2 of neuron2.synapses) {
                 if (synapse2.innovation > highestInnovation2) {
                     highestInnovation2 = synapse2.innovation;
-                    numberOfSynapses2++;
                 }
+                numberOfSynapses2++;
             }
         }
 
         for (let synapse2 of network.output.synapses) {
             if (synapse2.innovation > highestInnovation2) {
                 highestInnovation2 = synapse2.innovation;
-                numberOfSynapses2++;
             }
+            numberOfSynapses2++;
         }
 
         // mniejsza z najwiekszych innovation (geny excess to te ktore so poza zasiegiem jednej z sieci czyli wieksze niz ta liczba)

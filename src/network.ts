@@ -4,6 +4,7 @@ import { Neuron } from './neuron';
 import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR } from './ml';
 
 const synapseMutations: any[] = [];
+const neuronMutations: any[] = [];
 
 export class Network {
     //neurons: Neuron[] = [];
@@ -232,10 +233,22 @@ export class Network {
             }
 
             const chosenSynapse = synapses[Math.floor(Math.random() * synapses.length)];
-
             chosenSynapse.synapse.enabled = false;
 
-            // tODO przetrzymywac dokonane mutacje w tablicy
+            for (const muta of neuronMutations) {
+                if (muta.synapseId === chosenSynapse.synapse.innovation) {
+                    const newSynapse1: Synapse = new Synapse(muta.newSynapse1Id, chosenSynapse.synapse.origin);
+                    const newNeuron: Neuron = new Neuron(muta.neuronId, [newSynapse1]);
+                    this.hidden.push(newNeuron);
+
+                    const newSynapse2: Synapse = new Synapse(muta.newSynapse2Id, newNeuron);
+
+                    chosenSynapse.target.synapses.push(newSynapse2);
+
+                    return;
+                }
+            }
+
             const newSynapse1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, chosenSynapse.synapse.origin);
             const newNeuron: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [newSynapse1]);
             this.hidden.push(newNeuron);
@@ -243,6 +256,9 @@ export class Network {
             const newSynapse2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, newNeuron);
 
             chosenSynapse.target.synapses.push(newSynapse2);
+
+            neuronMutations.push({ neuronId: newNeuron.id, synapseId: chosenSynapse.synapse.innovation, newSynapse1Id: newSynapse1.innovation, newSynapse2Id: newSynapse2.innovation });
+            console.log(neuronMutations);
         }
 
     }

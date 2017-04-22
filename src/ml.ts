@@ -13,7 +13,7 @@ onmessage = (event) => {
     const runner: Runner = new Runner();
     runner.init();
 
-    while (runner.bestNetwork.fitness > 0.01) {
+    while (runner.bestNetwork.fitness > 0.0001) {
         runner.run();
     }
 

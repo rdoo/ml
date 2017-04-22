@@ -7,14 +7,11 @@ const synapseMutations: any[] = [];
 const neuronMutations: any[] = [];
 
 export class Network {
-    //neurons: Neuron[] = [];
     inputs: Neuron[] = [];
     hidden: Neuron[] = [];
     output: Neuron;
-    //synapses: Synapse[] = []; // TODO uzupelnic tablice lub wymyslic inny sposob
-    fitness: number = 0;
 
-    constructor() { }
+    fitness: number = 0;
 
     inittrudne() {
         INNOVATION_GENERATOR.value = 0;
@@ -132,10 +129,6 @@ export class Network {
         }
 
         return value;
-    }
-
-    countDisjoint(otherNetwork: Network): number {
-        return 0;
     }
 
     // TODO uniform pertrub if rnd < 0.9 then synapse.weight +- random.uniform(-3, 3)
@@ -262,10 +255,6 @@ export class Network {
 
     }
 
-    sameSpecies(otherNetwork: Network): boolean {
-        return false;
-    }
-
     isSynapseInHiddenWithId(id: number) {
         for (const neuron of this.hidden) {
             for (const synapse of neuron.synapses) {
@@ -354,18 +343,4 @@ export class Network {
             console.log('\tweight:', synapse.weight);
         }
     }
-
-    // copy() {
-    //     const copyNetwork: Network = new Network();
-
-    //     for (let neuron of this.inputs) { // moze kopiowac od tego bardziej fit?
-    //         copyNetwork.inputs.push(neuron.clone());
-    //     }
-
-    //     for (let neuron of this.hidden) {
-    //         copyNetwork.hidden.push(neuron.clone());
-    //     }
-
-    //     copyNetwork.output = this.output.clone();
-    // }
 }

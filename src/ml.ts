@@ -33,7 +33,7 @@ init() {
     const network: Network = new Network();
     network.init();
 
-    this.bestNetwork = this.crossover(network, network);
+    this.bestNetwork = network;
     this.bestNetwork.fitness = 10000;
 
     const newSpecies: Species = new Species(network);
@@ -49,31 +49,7 @@ init() {
     postMessage([this.step, this.bestNetwork, this.speciesArray]);
 }
 
-// let step: number = 0;
-// while (bestNetwork.fitness > 0.0001) {
-//     setTimeout(() => run(), 0);
-
-//     step++;
-//     // if (step === 20000) {
-//     //     break;
-//     // }
-// }
-
 printResults() {
-    // for (let species of this.speciesArray) {
-    //     console.log(species.networks[0].toString());
-    //     console.log('ilosc', species.networks.length);
-    // }
-
-    // console.log(this.bestNetwork.toString());
-    // console.log('best network fitness:', this.bestNetwork.fitness);
-    // for (let XOR of XORArray) {
-    //     console.log(XOR);
-    //     this.bestNetwork.inputs[0].value = XOR.i1;
-    //     this.bestNetwork.inputs[1].value = XOR.i2;
-    //     console.log(this.bestNetwork.evaluate());
-    // }
-
     postMessage([this.step, this.bestNetwork, this.speciesArray]);
 }
 
@@ -142,7 +118,7 @@ run() {
             const rnd1 = species.networks[Math.floor(Math.random() * species.networks.length)];
             const rnd2 = species.networks[Math.floor(Math.random() * species.networks.length)];
 
-            const newNetwork = this.crossover2(rnd1, rnd2);
+            const newNetwork = this.crossover(rnd1, rnd2);
             newNetwork.mutate();
 
             let speciesFound: boolean = false;
@@ -177,183 +153,6 @@ run() {
     this.step++;
 }
 
-crossover(n1: Network, n2: Network): Network {
-    const child: Network = new Network();
-
-    for (let neuron of n1.inputs) { // moze kopiowac od tego bardziej fit?
-        child.inputs.push(neuron.clone());
-    }
-
-    for (let neuron of n1.hidden) {
-        child.hidden.push(neuron.clone());
-    }
-
-    child.output = n1.output.clone();
-
-    for (let neuron1 of n1.hidden) {
-        for (let synapse1 of neuron1.synapses) {
-            loop: for (let neuron2 of n2.hidden) { // IIFE zamiast labelki??
-                for (let synapse2 of neuron2.synapses) {
-                    if (synapse1.innovation === synapse2.innovation) {
-                        const rnd: number = Math.random();
-
-                        if (rnd < 0.5) {
-                            for (let neuron of child.inputs) {
-                                if (neuron.id === synapse1.origin.id) {
-                                    const newSynapse: Synapse = synapse1.clone(neuron);
-
-                                    for (let parentNeuron of child.hidden) {
-                                        if (parentNeuron.id === neuron1.id) {
-                                            parentNeuron.synapses.push(newSynapse);
-                                            break loop;
-                                        }
-                                    }
-
-                                    if (child.output.id === neuron1.id) {
-                                        child.output.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-
-                            for (let neuron of child.hidden) {
-                                if (neuron.id === synapse1.origin.id) {
-                                    const newSynapse: Synapse = synapse1.clone(neuron);
-
-                                    for (let parentNeuron of child.hidden) {
-                                        if (parentNeuron.id === neuron1.id) {
-                                            parentNeuron.synapses.push(newSynapse);
-                                            break loop;
-                                        }
-                                    }
-
-                                    if (child.output.id === neuron1.id) {
-                                        child.output.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-
-                            if (child.output.id === synapse1.origin.id) { // przypadek rekurencyjnego od outputu do hidden
-                                const newSynapse: Synapse = synapse1.clone(child.output);
-
-                                for (let parentNeuron of child.hidden) {
-                                    if (parentNeuron.id === neuron1.id) {
-                                        parentNeuron.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-                        } else {
-                            for (let neuron of child.inputs) {
-                                if (neuron.id === synapse2.origin.id) {
-                                    const newSynapse: Synapse = synapse2.clone(neuron);
-
-                                    for (let parentNeuron of child.hidden) {
-                                        if (parentNeuron.id === neuron2.id) {
-                                            parentNeuron.synapses.push(newSynapse);
-                                            break loop;
-                                        }
-                                    }
-
-                                    if (child.output.id === neuron2.id) {
-                                        child.output.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-
-                            for (let neuron of child.hidden) {
-                                if (neuron.id === synapse2.origin.id) {
-                                    const newSynapse: Synapse = synapse2.clone(neuron);
-
-                                    for (let parentNeuron of child.hidden) {
-                                        if (parentNeuron.id === neuron2.id) {
-                                            parentNeuron.synapses.push(newSynapse);
-                                            break loop;
-                                        }
-                                    }
-
-                                    if (child.output.id === neuron2.id) {
-                                        child.output.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-
-                            if (child.output.id === synapse2.origin.id) { // przypadek rekurencyjnego od outputu do hidden
-                                const newSynapse: Synapse = synapse2.clone(child.output);
-
-                                for (let parentNeuron of child.hidden) {
-                                    if (parentNeuron.id === neuron2.id) {
-                                        parentNeuron.synapses.push(newSynapse);
-                                        break loop;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (let synapse1 of n1.output.synapses) {
-        loop: for (let synapse2 of n2.output.synapses) {
-            if (synapse1.innovation === synapse2.innovation) {
-                const rnd: number = Math.random();
-
-                if (rnd < 0.5) {
-                    for (let neuron of child.inputs) {
-                        if (neuron.id === synapse1.origin.id) {
-                            const newSynapse: Synapse = synapse1.clone(neuron);
-                            child.output.synapses.push(newSynapse);
-                            break loop;
-                        }
-                    }
-                    for (let neuron of child.hidden) {
-                        if (neuron.id === synapse1.origin.id) {
-                            const newSynapse: Synapse = synapse1.clone(neuron);
-                            child.output.synapses.push(newSynapse);
-                            break loop;
-                        }
-                    }
-                } else {
-                    for (let neuron of child.inputs) {
-                        if (neuron.id === synapse2.origin.id) {
-                            const newSynapse: Synapse = synapse2.clone(neuron);
-                            child.output.synapses.push(newSynapse);
-                            break loop;
-                        }
-                    }
-                    for (let neuron of child.hidden) {
-                        if (neuron.id === synapse2.origin.id) {
-                            const newSynapse: Synapse = synapse2.clone(neuron);
-                            child.output.synapses.push(newSynapse);
-                            break loop;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // for (let synapse1 of n1.synapses) {
-    //     for (let synapse2 of n2.synapses) {
-    //         if (synapse1.innovation === synapse2.innovation) {
-    //             const rnd: number = Math.random();
-
-
-    //         }
-    //     }
-    // }
-
-    this.testChildNetwork(n1, n2, child);
-
-
-    return child;
-}
-
 getCulled() {
     for (let species of this.speciesArray) {
         species.networks.sort((network1, network2) => {
@@ -366,7 +165,7 @@ getCulled() {
     }
 }
 
-crossover2(n1: Network, n2: Network): Network {
+crossover(n1: Network, n2: Network): Network {
     let moreFit: Network;
     let lessFit: Network;
 
@@ -437,11 +236,10 @@ crossover2(n1: Network, n2: Network): Network {
         }
     }
 
-    this.testChildNetwork(n1, n2, child);
-
     return child;
 }
 
+// currently not used
 testChildNetwork(n1: Network, n2: Network, child: Network) {
     for (let neuron of child.hidden) {
         if (neuron.synapses.length === 0) {

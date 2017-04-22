@@ -258,7 +258,6 @@ export class Network {
             chosenSynapse.target.synapses.push(newSynapse2);
 
             neuronMutations.push({ neuronId: newNeuron.id, synapseId: chosenSynapse.synapse.innovation, newSynapse1Id: newSynapse1.innovation, newSynapse2Id: newSynapse2.innovation });
-            console.log(neuronMutations);
         }
 
     }
@@ -297,6 +296,39 @@ export class Network {
         }
 
         throw('Neuron not found!');
+    }
+
+    deepCopy(): Network {
+        const networkCopy: Network = new Network();
+
+        for (let neuron of this.inputs) {
+            networkCopy.inputs.push(neuron.clone());
+        }
+
+        for (let neuron of this.hidden) {
+            networkCopy.hidden.push(neuron.clone());
+        }
+
+        networkCopy.output = this.output.clone();
+
+        for (let neuron of this.hidden) {
+            for (const synapse of neuron.synapses) {
+                const newOrigin = networkCopy.findNeuronWithId(synapse.origin.id);
+                const newHost = networkCopy.findNeuronWithId(neuron.id);
+                const newSynapse = synapse.clone(newOrigin);
+                newHost.synapses.push(newSynapse);
+            }
+        }
+
+        for (const synapse of this.output.synapses) {
+            const newOrigin = networkCopy.findNeuronWithId(synapse.origin.id);
+            const newSynapse = synapse.clone(newOrigin);
+            networkCopy.output.synapses.push(newSynapse);
+        }
+
+        networkCopy.fitness = this.fitness;
+
+        return networkCopy;
     }
 
     toString() {

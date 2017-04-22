@@ -126,8 +126,7 @@ run() {
     
     for (let species of this.speciesArray) {
         if (species.networks[0].fitness < this.bestNetwork.fitness) {
-            this.bestNetwork = this.crossover(species.networks[0], species.networks[0]); // hack do otrzymania kopii network
-            this.bestNetwork.fitness = species.networks[0].fitness;
+            this.bestNetwork = species.networks[0].deepCopy();
         }
     }
 
@@ -349,48 +348,7 @@ crossover(n1: Network, n2: Network): Network {
     //     }
     // }
 
-// todo to ponizej to test crossoveru
-    for (let neuron of child.hidden) {
-        if (neuron.synapses.length === 0) {
-
-            let numberOfSynapses = 0;
-
-            for (let neuronx of child.hidden) {
-                for (let synapsex of neuronx.synapses) {
-                    if (synapsex.origin.id === neuron.id) {
-                        numberOfSynapses++;
-                    }
-                }
-            }
-
-            for (let synapsex of child.output.synapses) {
-                if (synapsex.origin.id === neuron.id) {
-                    numberOfSynapses++;
-                }
-            }
-
-            if (numberOfSynapses === 0) {
-
-
-                const species1 = new Species(n1);
-                n1.fitness = 1;
-                species1.networks.push(n1);
-
-                const species2 = new Species(n2);
-                n2.fitness = 1;
-                species2.networks.push(n2);
-
-                child.fitness = 0;
-                const species3 = new Species(child);
-                species3.networks.push(child);
-
-                this.speciesArray = [species1, species2, species3];
-                postMessage([this.step, this.bestNetwork, this.speciesArray]);
-                console.log('elo');
-                break;
-            }
-        }
-    }
+    this.testChildNetwork(n1, n2, child);
 
 
     return child;
@@ -458,32 +416,33 @@ crossover2(n1: Network, n2: Network): Network {
         }
     }
 
-        for (let synapse of moreFit.output.synapses) {
-            const synapseBeingResult = lessFit.isSynapseInHiddenWithId(synapse.innovation);
-            if (synapseBeingResult.result) {
-                const newOrigin = child.findNeuronWithId(synapse.origin.id);
-                const newHost = child.findNeuronWithId(moreFit.output.id);
-                const newSynapse = synapse.clone(newOrigin);
+    for (let synapse of moreFit.output.synapses) {
+        const synapseBeingResult = lessFit.isSynapseInHiddenWithId(synapse.innovation);
+        if (synapseBeingResult.result) {
+            const newOrigin = child.findNeuronWithId(synapse.origin.id);
+            const newSynapse = synapse.clone(newOrigin);
 
-                const rnd: number = Math.random();
+            const rnd: number = Math.random();
 
-                // waga jest randomowa pomiedzy synapse w moreFit i lessFit
-                if (rnd < 0.5) {
-                    newSynapse.weight = synapseBeingResult.weight;
-                }
-
-                newHost.synapses.push(newSynapse);
-            } else {
-                const newOrigin = child.findNeuronWithId(synapse.origin.id);
-                const newHost = child.findNeuronWithId(moreFit.output.id);
-                const newSynapse = synapse.clone(newOrigin);
-                newHost.synapses.push(newSynapse);
+            // waga jest randomowa pomiedzy synapse w moreFit i lessFit
+            if (rnd < 0.5) {
+                newSynapse.weight = synapseBeingResult.weight;
             }
 
+            child.output.synapses.push(newSynapse);
+        } else {
+            const newOrigin = child.findNeuronWithId(synapse.origin.id);
+            const newSynapse = synapse.clone(newOrigin);
+            child.output.synapses.push(newSynapse);
         }
+    }
 
+    this.testChildNetwork(n1, n2, child);
 
-// todo to ponizej to test crossoveru
+    return child;
+}
+
+testChildNetwork(n1: Network, n2: Network, child: Network) {
     for (let neuron of child.hidden) {
         if (neuron.synapses.length === 0) {
 
@@ -520,13 +479,10 @@ crossover2(n1: Network, n2: Network): Network {
 
                 this.speciesArray = [species1, species2, species3];
                 postMessage([this.step, this.bestNetwork, this.speciesArray]);
-                console.log('elo');
-                break;
+                throw('Neuron has 0 synapses!');
             }
         }
     }
-
-    return child;
 }
 
 }

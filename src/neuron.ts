@@ -6,14 +6,14 @@ export class Neuron {
     value: number = 0;
     calculating: boolean = false;
 
-    constructor(id: number, synapses: Synapse[] = []) { // TODO zmienic threshold
+    constructor(id: number, synapses: Synapse[] = []) {
         this.id = id;
         this.synapses = synapses;
     }
 
     clone(): Neuron {
-        const newNeuron: Neuron = new Neuron(this.id); // wylaczyc zwiekszanie id
-        newNeuron.value = this.value; // konieczne?
+        const newNeuron: Neuron = new Neuron(this.id);
+        newNeuron.value = this.value; // TODO konieczne?
 
         return newNeuron;
     }

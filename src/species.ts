@@ -156,7 +156,7 @@ export class Species {
         }
 
         // ostateczne obliczenia
-        W = 1.0 * W / matchingSynapses; // not sure of int in javascript
+        W = W / matchingSynapses;
 
         const difference: number = (c1 * E + c2 * D) / N + c3 * W;
 

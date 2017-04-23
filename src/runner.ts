@@ -9,11 +9,11 @@ export class Runner {
     speciesArray: Species[] = [];
     bestNetwork: Network;
 
-    step: number = 0;
+    currentStep: number = 0;
 
     constructor() {
         const network: Network = new Network();
-        network.init();
+        network.initBasicNetwork();
 
         this.bestNetwork = network;
         this.bestNetwork.fitness = 10000;
@@ -24,15 +24,15 @@ export class Runner {
 
         for (let i = 0; i < CONFIG.networksNumber - 1; i++) {
             const network: Network = new Network();
-            network.init();
+            network.initBasicNetwork();
             newSpecies.networks.push(network);
         }
 
-        postMessage([this.step, this.bestNetwork, this.speciesArray]);
+        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 
     printResults() {
-        postMessage([this.step, this.bestNetwork, this.speciesArray]);
+        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 
     run() {
@@ -44,23 +44,18 @@ export class Runner {
                 network.fitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
                 for (let i = 0; i < 100; i++) {
                     const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
-                    //for (let XOR of XORArray.concat(XORArray)) { // tu powinien byc random?
-                        network.inputs[0].value = XOR.i1;
-                        network.inputs[1].value = XOR.i2;
-                        const val: number = Math.abs(network.evaluate() - XOR.o);
-                        network.fitness += val;
-                        species.averageFitness += val;
-                    //}
+                    network.inputs[0].value = XOR.i1;
+                    network.inputs[1].value = XOR.i2;
+                    const errorValue: number = Math.abs(network.evaluate() - XOR.o);
+                    network.fitness += errorValue;
+                    species.averageFitness += errorValue;
                 }
             }
             species.averageFitness = species.averageFitness / species.networks.length;
-            //console.log(species.averageFitness);
-            //console.log(species.networks.length);
             sumOfAverageFitnesses += species.averageFitness;
         }
-        //console.log(sumOfAverageFitnesses);
 
-        // todo srednia fitnessu liczymy przed ubojem czy po?
+        // TODO srednia fitnessu liczymy przed ubojem czy po?
 
         let sumaCzastek: number = 0; // do przemyslenia i to powaznie
 
@@ -75,9 +70,8 @@ export class Runner {
         for (let species of this.speciesArray) {
             species.desiredPopulation = Math.floor(species.desiredPopulation / sumaCzastek * maxNewNetworks) + 1; // +1 zeby zawsze byl przynajmniej 1 // 1 - zeby im wieksza fitness tym mniejsza pop
             sumOfNewNetworks += species.desiredPopulation;
-            //console.log('desired populationn', species.desiredPopulation);
         }
-        //if (this.NUMBER_OF_NETWORKS - sumOfNewNetworks > 0)
+
         this.speciesArray[this.speciesArray.length - 1].desiredPopulation += CONFIG.networksNumber - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
 
         this.culling();
@@ -88,11 +82,10 @@ export class Runner {
             }
         }
 
-        //console.log(this.step + ' ' + this.bestNetwork.fitness);
-        if (this.step % 50 === 0) {
-            postMessage([this.step, this.bestNetwork, this.speciesArray]);
+        if (this.currentStep % 50 === 0) {
+            postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
         }
-        //console.log(this.speciesArray.length);
+
         // TODO wszystkie networks trzeba przeorganizowac w nowe species????
         for (let species of this.speciesArray) {
             let speciesInitialLength: number = species.networks.length;
@@ -101,6 +94,8 @@ export class Runner {
                 const rnd2 = species.networks[Math.floor(Math.random() * species.networks.length)];
 
                 const newNetwork = this.crossover(rnd1, rnd2);
+                // TODO przemyslec czy mutacja ma zachodzic w tym miejscu
+                // TODO przemyslec czy mutowac maja tylko sieci z crossoveru
                 newNetwork.mutate();
 
                 let speciesFound: boolean = false;
@@ -118,21 +113,11 @@ export class Runner {
                     this.speciesArray.push(newSpecies);
                 }
 
-                //networks.push();
-
                 speciesInitialLength++;
             }
         }
 
-        // segregacja do species
-
-        // todo mutowac maja tylko sieci z crossoveru???
-        // for (let species of speciesArray) {
-        //     for (let network of species.networks) {
-        //         network.mutate();
-        //     }
-        // }
-        this.step++;
+        this.currentStep++;
     }
 
     culling() {
@@ -280,6 +265,6 @@ export class Runner {
         species3.networks.push(child);
 
         this.speciesArray = [species1, species2, species3];
-        postMessage([this.step, this.bestNetwork, this.speciesArray]);
+        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 }

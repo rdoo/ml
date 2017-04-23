@@ -1,10 +1,8 @@
 import { Synapse } from './synapse';
 import { Neuron } from './neuron';
+import { SynapseWithTarget } from './globals';
 
 import { CONFIG, GLOBALS } from './ml';
-
-const synapseMutations: any[] = [];
-const neuronMutations: any[] = [];
 
 export class Network {
     inputs: Neuron[] = [];
@@ -13,7 +11,7 @@ export class Network {
 
     fitness: number = 0;
 
-    init() {
+    initBasicNetwork() {
         GLOBALS.currentNeuronId = 0;
         GLOBALS.currentSynapseId = 0;
 
@@ -103,9 +101,9 @@ export class Network {
 
             // szuka czy tego typu mutacja nie byla juz wykonana wczesniej i ja duplikuje
             if (!mutationDone) {
-                for (const muta of synapseMutations) {
-                    if (muta.origin === neuron1.id && muta.target === neuron2.id) {
-                        const newSynapse = new Synapse(muta.innovation, neuron1);
+                for (const mutation of GLOBALS.synapseMutations) {
+                    if (mutation.originId === neuron1.id && mutation.targetId === neuron2.id) {
+                        const newSynapse = new Synapse(mutation.synapseId, neuron1);
                         neuron2.synapses.push(newSynapse);
                         mutationDone = true;
                         break;
@@ -117,14 +115,14 @@ export class Network {
             if (!mutationDone) {
                 const newSynapse = new Synapse(GLOBALS.currentSynapseId++, neuron1);
                 neuron2.synapses.push(newSynapse);
-                synapseMutations.push({ origin: newSynapse.origin.id, target: neuron2.id, innovation: newSynapse.innovation });
+                GLOBALS.synapseMutations.push({ synapseId: newSynapse.innovation, originId: newSynapse.origin.id, targetId: neuron2.id });
             }      
         }
 
-        // to do mutacja dodatkowego neuronu
+        // mutacja dodatkowego neuronu
         rnd = Math.random();
         if (rnd < CONFIG.neuronMutation) {
-            const synapses: any[] = [];
+            const synapses: SynapseWithTarget[] = [];
             // TODO co jesli synapse jest disabled???
             for (let neuron of this.hidden) {
                 for (let synapse of neuron.synapses) {
@@ -139,14 +137,14 @@ export class Network {
             const chosenSynapse = synapses[Math.floor(Math.random() * synapses.length)];
             chosenSynapse.synapse.enabled = false;
 
-            for (const muta of neuronMutations) {
+            for (const mutation of GLOBALS.neuronMutations) {
                 // TODO przemyslec
-                if (muta.synapseId === chosenSynapse.synapse.innovation && !this.doesNeuronExist(muta.neuronId)) { // jesli taka mutacja sie juz odbyla ale nie istnieje w tym network
-                    const newSynapse1: Synapse = new Synapse(muta.newSynapse1Id, chosenSynapse.synapse.origin);
-                    const newNeuron: Neuron = new Neuron(muta.neuronId, [newSynapse1]);
+                if (mutation.synapseId === chosenSynapse.synapse.innovation && !this.doesNeuronExist(mutation.neuronId)) { // jesli taka mutacja sie juz odbyla ale nie istnieje w tym network
+                    const newSynapse1: Synapse = new Synapse(mutation.newSynapse1Id, chosenSynapse.synapse.origin);
+                    const newNeuron: Neuron = new Neuron(mutation.neuronId, [newSynapse1]);
                     this.hidden.push(newNeuron);
 
-                    const newSynapse2: Synapse = new Synapse(muta.newSynapse2Id, newNeuron);
+                    const newSynapse2: Synapse = new Synapse(mutation.newSynapse2Id, newNeuron);
 
                     chosenSynapse.target.synapses.push(newSynapse2);
 
@@ -162,7 +160,7 @@ export class Network {
 
             chosenSynapse.target.synapses.push(newSynapse2);
 
-            neuronMutations.push({ neuronId: newNeuron.id, synapseId: chosenSynapse.synapse.innovation, newSynapse1Id: newSynapse1.innovation, newSynapse2Id: newSynapse2.innovation });
+            GLOBALS.neuronMutations.push({ neuronId: newNeuron.id, synapseId: chosenSynapse.synapse.innovation, newSynapse1Id: newSynapse1.innovation, newSynapse2Id: newSynapse2.innovation });
         }
 
     }

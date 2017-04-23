@@ -1,14 +1,26 @@
 import { Network } from './network';
 import { Neuron } from './neuron';
+import { Config } from './config';
 
 declare var d3; // janusze typescriptu
-
-let change = 'asdsdddasaaadaadadaaaaaaaas'
 
 let worker;
 let running: boolean = true;
 
 let bestNetwork: any;
+
+let config: Config = {
+    networksNumber: 0,
+    cullingPercent: 0,
+    fitnessThreshold: 0,
+    weightMutation: 0,
+    synapseMutation: 0,
+    neuronMutation: 0,
+    c1: 0,
+    c2: 0,
+    c3: 0,
+    sameSpeciesThreshold: 0
+};
 
 for (let i = 0; i < 50; i++) {
     const id: string = 'species' + i;
@@ -20,7 +32,8 @@ for (let i = 0; i < 50; i++) {
 export function start() {
     worker = new Worker('./worker.js');
     worker.onmessage = onMessage;
-    worker.postMessage('');
+    updateConfig();
+    worker.postMessage([config]);
 }
 
 export function pause() {
@@ -29,6 +42,19 @@ export function pause() {
 
 export function stop() {
     worker.terminate();
+}
+
+export function updateConfig() {
+    config.networksNumber = Number((<HTMLInputElement>document.getElementById('networksNumber')).value);
+    config.cullingPercent = Number((<HTMLInputElement>document.getElementById('cullingPercent')).value);
+    config.fitnessThreshold = Number((<HTMLInputElement>document.getElementById('fitnessThreshold')).value);
+    config.weightMutation = Number((<HTMLInputElement>document.getElementById('weightMutation')).value);
+    config.synapseMutation = Number((<HTMLInputElement>document.getElementById('synapseMutation')).value);
+    config.neuronMutation = Number((<HTMLInputElement>document.getElementById('neuronMutation')).value);
+    config.c1 = Number((<HTMLInputElement>document.getElementById('c1')).value);
+    config.c2 = Number((<HTMLInputElement>document.getElementById('c2')).value);
+    config.c3 = Number((<HTMLInputElement>document.getElementById('c3')).value);
+    config.sameSpeciesThreshold = Number((<HTMLInputElement>document.getElementById('sameSpeciesThreshold')).value);
 }
 
 const onMessage = (event) => {

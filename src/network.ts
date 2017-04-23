@@ -1,7 +1,7 @@
 import { Synapse } from './synapse';
 import { Neuron } from './neuron';
 
-import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR } from './ml';
+import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR, MLCONFIG } from './ml';
 
 const synapseMutations: any[] = [];
 const neuronMutations: any[] = [];
@@ -49,7 +49,7 @@ export class Network {
             for (let synapse of neuron.synapses) {
                 const rnd = Math.random();
 
-                if (rnd < 0.05) {
+                if (rnd < MLCONFIG.weightMutation) {
                     synapse.weight = Math.random() * 20 - 10;
                 }
             }
@@ -58,14 +58,14 @@ export class Network {
         for (let synapse of this.output.synapses) {
             const rnd = Math.random();
 
-            if (rnd < 0.05) {
+            if (rnd < MLCONFIG.weightMutation) {
                 synapse.weight = Math.random() * 20 - 10;
             }
         }
 
         // mutacja dodatkowych synaps
         let rnd = Math.random();
-        if (rnd < 0.05) {
+        if (rnd < MLCONFIG.synapseMutation) {
             let mutationDone: boolean = false;
             
             const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2 + 1)); // origin +1 output +2 input +1 bias// TODO refactor
@@ -123,7 +123,7 @@ export class Network {
 
         // to do mutacja dodatkowego neuronu
         rnd = Math.random();
-        if (rnd < 0.001) {
+        if (rnd < MLCONFIG.neuronMutation) {
             const synapses: any[] = [];
             // TODO co jesli synapse jest disabled???
             for (let neuron of this.hidden) {
@@ -172,6 +172,16 @@ export class Network {
                 if (synapse.innovation === id) {
                     return { result: true, weight: synapse.weight };
                 }
+            }
+        }
+
+        return { result: false, weight: 0 };
+    }
+
+    isSynapseInOutputWithId(id: number) {
+        for (const synapse of this.output.synapses) {
+            if (synapse.innovation === id) {
+                return { result: true, weight: synapse.weight };
             }
         }
 

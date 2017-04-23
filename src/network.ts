@@ -140,7 +140,8 @@ export class Network {
             chosenSynapse.synapse.enabled = false;
 
             for (const muta of neuronMutations) {
-                if (muta.synapseId === chosenSynapse.synapse.innovation) {
+                // TODO przemyslec
+                if (muta.synapseId === chosenSynapse.synapse.innovation && !this.doesNeuronExist(muta.neuronId)) { // jesli taka mutacja sie juz odbyla ale nie istnieje w tym network
                     const newSynapse1: Synapse = new Synapse(muta.newSynapse1Id, chosenSynapse.synapse.origin);
                     const newNeuron: Neuron = new Neuron(muta.neuronId, [newSynapse1]);
                     this.hidden.push(newNeuron);
@@ -206,6 +207,16 @@ export class Network {
         }
 
         throw('Neuron not found!');
+    }
+
+    doesNeuronExist(id: number): boolean {
+        for (const neuron of this.hidden) {
+            if (neuron.id === id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     deepCopy(): Network {

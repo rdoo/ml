@@ -241,11 +241,14 @@ export class Runner {
             }
         }
 
+        //this.testChildNetworkDoubleNeurons(n1, n2, child);
+        //this.testChildNetworkNoSynapses(n1, n2, child);
+
         return child;
     }
 
     // currently not used
-    testChildNetwork(n1: Network, n2: Network, child: Network) {
+    testChildNetworkNoSynapses(n1: Network, n2: Network, child: Network) {
         for (let neuron of child.hidden) {
             if (neuron.synapses.length === 0) {
 
@@ -266,25 +269,41 @@ export class Runner {
                 }
 
                 if (numberOfSynapses === 0) {
-
-
-                    const species1 = new Species(n1);
-                    n1.fitness = 1;
-                    species1.networks.push(n1);
-
-                    const species2 = new Species(n2);
-                    n2.fitness = 1;
-                    species2.networks.push(n2);
-
-                    child.fitness = 0;
-                    const species3 = new Species(child);
-                    species3.networks.push(child);
-
-                    this.speciesArray = [species1, species2, species3];
-                    postMessage([this.step, this.bestNetwork, this.speciesArray]);
+                    this.testPrintDebug(n1, n2, child);
                     throw('Neuron has 0 synapses!');
                 }
             }
         }
+    }
+
+    testChildNetworkDoubleNeurons(n1: Network, n2: Network, child: Network) {
+        const neuronIds: number[] = [];
+
+        for (const neuron of child.hidden) {
+            if (neuronIds.indexOf(neuron.id) === -1) {
+                neuronIds.push(neuron.id);
+            } else {
+                this.testPrintDebug(n1, n2, child);
+                throw('Network has multiple neurons with same id!');
+            }
+        }
+
+    }
+
+    testPrintDebug(n1: Network, n2: Network, child: Network) {
+        const species1 = new Species(n1);
+        n1.fitness = 1;
+        species1.networks.push(n1);
+
+        const species2 = new Species(n2);
+        n2.fitness = 1;
+        species2.networks.push(n2);
+
+        child.fitness = 0;
+        const species3 = new Species(child);
+        species3.networks.push(child);
+
+        this.speciesArray = [species1, species2, species3];
+        postMessage([this.step, this.bestNetwork, this.speciesArray]);
     }
 }

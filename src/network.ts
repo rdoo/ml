@@ -120,6 +120,7 @@ export class Network {
         }
 
         // mutacja dodatkowego neuronu
+        // TODO czy mutacja moze sie odbyc na synapsie ktora ma ten sam neuron wejsciowy i wyjsciowy?
         rnd = Math.random();
         if (rnd < CONFIG.neuronMutation) {
             const synapses: SynapseWithTarget[] = [];

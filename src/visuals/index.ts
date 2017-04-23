@@ -8,7 +8,7 @@ declare var d3; // janusze typescriptu
 let worker;
 let running: boolean = true;
 
-let bestNetwork: any;
+let bestNetwork: Network;
 
 let config: Config = {
     networksNumber: 0,
@@ -22,13 +22,6 @@ let config: Config = {
     c3: 0,
     sameSpeciesThreshold: 0
 };
-
-for (let i = 0; i < 50; i++) {
-    const id: string = 'species' + i;
-    const div = document.createElement('div');
-    div.id = id;
-    setTimeout(() => document.body.appendChild(div), 100);
-}
 
 export function start() {
     worker = new Worker('./worker.js');
@@ -83,6 +76,7 @@ const onMessage = (event) => {
 
             const svgDiv = document.createElement('div');
             svgDiv.id = id;
+            svgDiv.className = 'svg-div';
             document.getElementById('species').appendChild(svgDiv);
             drawNetwork('species' + speciesNumber, species.networks[0]);
             speciesNumber++;
@@ -97,8 +91,8 @@ const drawNetwork = (id: string, network: Network) => {
     let Y_OFFSET: number = 25;
 
     const svg = d3.select('#' + id).append('svg')
-        .attr('width', 2500)
-        .attr('height', 700);
+        .attr('width', 4000)
+        .attr('height', 4000);
 
     let layerNumber: number = 0;
     let currentNodeInLayer: number = 0;

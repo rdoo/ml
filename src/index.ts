@@ -126,7 +126,7 @@ const drawNetwork = (id: string, network: Network) => {
     currentNodeInLayer = 0;
 
     let y_offset_plus: boolean = true;
-    Y_OFFSET += y_offset_plus ? 50 : -50;
+    Y_OFFSET += y_offset_plus ? 25 : -25;
     y_offset_plus = !y_offset_plus;
 
     do {
@@ -177,7 +177,7 @@ const drawNetwork = (id: string, network: Network) => {
         layerNumber++;
         currentNodeInLayer = 0;
 
-        Y_OFFSET += y_offset_plus ? 50 : -50;
+        Y_OFFSET += y_offset_plus ? 25 : -25;
         y_offset_plus = !y_offset_plus;
 
         const x: number = layerNumber * X_MULTIPLIER + 50;
@@ -203,7 +203,7 @@ const drawNetwork = (id: string, network: Network) => {
             const targetX: number = (neuron as any).x;
             let targetY: number = (neuron as any).y;
 
-            let color: string = 'black';
+            let color: string = 'green';
 
             if (synapse.weight < 0) {
                 color = 'red';
@@ -234,7 +234,7 @@ const drawNetwork = (id: string, network: Network) => {
         const targetX: number = (network.output as any).x;
         let targetY: number = (network.output as any).y;
 
-        let color: string = 'black';
+        let color: string = 'green';
 
         if (synapse.weight < 0) {
             color = 'red';

@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     context: path.join(__dirname, 'src'),
@@ -26,6 +27,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: path.join(__dirname, 'src', 'visuals', 'index.html') },
             { from: path.join(__dirname, 'src', 'visuals', 'd3.min.js') }
-        ])
+        ]),
+        new UglifyJSPlugin()
     ]
 };

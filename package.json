@@ -4,7 +4,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "start2": "concurrently \"tsc -w\" \"nodemon --watch build build/ml.js\"",
     "start": "webpack-dev-server --content-base build/",
     "build": "webpack"
   },
@@ -16,6 +15,7 @@
     "copy-webpack-plugin": "^4.0.1",
     "nodemon": "^1.11.0",
     "typescript": "^2.2.1",
+    "uglifyjs-webpack-plugin": "^0.4.3",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.4.2"
   }

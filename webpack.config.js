@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
     context: path.join(__dirname, 'src'),
     entry: {
-        bundle: './index.ts',
+        bundle: './visuals/index.ts',
         worker: './ml.ts'
     },
     output: {
@@ -24,8 +24,8 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            { from: path.join(__dirname, 'src', 'index.html') },
-            { from: path.join(__dirname, 'src', 'd3.min.js') }
+            { from: path.join(__dirname, 'src', 'visuals', 'index.html') },
+            { from: path.join(__dirname, 'src', 'visuals', 'd3.min.js') }
         ])
     ]
 };

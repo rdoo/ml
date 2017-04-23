@@ -1,7 +1,7 @@
-import { Network } from './network';
-import { Neuron } from './neuron';
-import { Config } from './config';
-import { XORArray } from './xor';
+import { Network } from '../network';
+import { Neuron } from '../neuron';
+import { Config } from '../config';
+import { XORArray } from '../xor';
 
 declare var d3; // janusze typescriptu
 

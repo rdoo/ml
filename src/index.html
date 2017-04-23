@@ -7,6 +7,14 @@
         input {
             width: 50px;
         }
+
+        td:nth-child(3n - 2) {
+            width: 100px;
+        }
+
+        td {
+            width: 300px;
+        }
     </style>
 </head>
 <body>
@@ -24,9 +32,29 @@
     C3: <input id="c3" value="0.002" onkeyup="ml.updateConfig()">
     Species threshold: <input id="sameSpeciesThreshold" value="1.0" onkeyup="ml.updateConfig()">
     <br>
-    Input1: <input id="input1" onkeyup="ml.calcResult()">
-    Input2: <input id="input2" onkeyup="ml.calcResult()">
-    Result: <span id="result"></span>
+    <table>
+        <tr>
+            <td>0 , 0 → 0</td>
+            <td>network: <span id="00"></span></td>
+            <td>round(5): <span id="00r"></span></td>
+        </tr>
+        <tr>
+            <td>0 , 1 → 1</td>
+            <td>network: <span id="01"></span></td>
+            <td>round(5): <span id="01r"></span></td>
+        </tr>
+        <tr>
+            <td>1 , 0 → 1</td>
+            <td>network: <span id="10"></span></td>
+            <td>round(5): <span id="10r"></span></td>
+        </tr>
+        <tr>
+            <td>1 , 1 → 0</td>
+            <td>network: <span id="11"></span></td>
+            <td>round(5): <span id="11r"></span></td>
+        </tr>
+    </table>
+    <br>
     <div>
         <span>Step: </span>
         <span id="step">0</span>

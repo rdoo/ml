@@ -1,6 +1,7 @@
 import { Network } from './network';
 import { Neuron } from './neuron';
 import { Config } from './config';
+import { XORArray } from './xor';
 
 declare var d3; // janusze typescriptu
 
@@ -60,6 +61,7 @@ export function updateConfig() {
 const onMessage = (event) => {
     if (running) {
         bestNetwork = event.data[1];
+        calcResult();
         document.getElementById('step').innerText = event.data[0];
         document.getElementById('bestNetworkFitness').innerText = event.data[1].fitness;
         document.getElementById('numberOfSpecies').innerText = event.data[2].length;
@@ -258,7 +260,7 @@ const drawNetwork = (id: string, network: Network) => {
     //svg.append('line').attr('x1', 100).attr('y1', 100).attr('x2', 200).attr('y2', 200).style('stroke', 'black');
 }
 
-export const calcResult = () => {
+function calcResult() {
 
     // TODO WAZNE !!!!! dodac to do globali
     function getValue(): number {
@@ -286,33 +288,38 @@ export const calcResult = () => {
         return 1.0 / (1.0 + Math.exp(-4.9 * this.value));
     }
 
-    const input1: number = Number((document.getElementById('input1') as any).value);
-    const input2: number = Number((document.getElementById('input2') as any).value);
+    //const input1: number = Number((document.getElementById('input1') as any).value);
+    //const input2: number = Number((document.getElementById('input2') as any).value);
 
-    console.log(input1, input2);
+    //console.log(input1, input2);
 
     //console.log(bestNetwork);
 
-    bestNetwork.inputs[0].value = input1;
-    bestNetwork.inputs[1].value = input2;
+    for (const XOR of XORArray) {
 
-    for (let neuron of bestNetwork.inputs) {
-        neuron.getValue = getValue.bind(neuron);
-    }
+        bestNetwork.inputs[0].value = XOR.i1;
+        bestNetwork.inputs[1].value = XOR.i2;
 
-    for (let neuron of bestNetwork.hidden) {
-        neuron.getValue = getValue.bind(neuron);
-    }
+        for (let neuron of bestNetwork.inputs) {
+            neuron.getValue = getValue.bind(neuron);
+        }
 
-    bestNetwork.output.getValue = getValue.bind(bestNetwork.output);
+        for (let neuron of bestNetwork.hidden) {
+            neuron.getValue = getValue.bind(neuron);
+        }
 
-    document.getElementById('result').innerText = String(bestNetwork.output.getValue.apply(bestNetwork.output));
+        bestNetwork.output.getValue = getValue.bind(bestNetwork.output);
+
+        document.getElementById('' + XOR.i1 + XOR.i2).innerText = String(bestNetwork.output.getValue.apply(bestNetwork.output));
+        document.getElementById('' + XOR.i1 + XOR.i2 + 'r').innerText = bestNetwork.output.getValue.apply(bestNetwork.output).toFixed(5);
 
 
-    bestNetwork.output.calculating = false;
+        bestNetwork.output.calculating = false;
 
-    for (let neuron of bestNetwork.hidden) {
-        neuron.calculating = false;
+        for (let neuron of bestNetwork.hidden) {
+            neuron.calculating = false;
+        }
+
     }
 }
 

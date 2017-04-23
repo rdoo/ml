@@ -1,7 +1,7 @@
 import { Synapse } from './synapse';
 import { Neuron } from './neuron';
 
-import { INNOVATION_GENERATOR, NEURON_ID_GENERATOR, MLCONFIG } from './ml';
+import { CONFIG, GLOBALS } from './ml';
 
 const synapseMutations: any[] = [];
 const neuronMutations: any[] = [];
@@ -14,20 +14,20 @@ export class Network {
     fitness: number = 0;
 
     init() {
-        INNOVATION_GENERATOR.value = 0;
-        NEURON_ID_GENERATOR.value = 0;
+        GLOBALS.currentNeuronId = 0;
+        GLOBALS.currentSynapseId = 0;
 
-        const input1: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
-        const input2: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
-        const bias: Neuron = new Neuron(NEURON_ID_GENERATOR.value++);
+        const input1: Neuron = new Neuron(GLOBALS.currentNeuronId++);
+        const input2: Neuron = new Neuron(GLOBALS.currentNeuronId++);
+        const bias: Neuron = new Neuron(GLOBALS.currentNeuronId++);
         bias.value = 1;
 
         this.inputs.push(input1);
         this.inputs.push(input2);
         this.inputs.push(bias);
 
-        const synapse: Synapse = new Synapse(INNOVATION_GENERATOR.value++, input1);
-        this.output = new Neuron(NEURON_ID_GENERATOR.value++, [synapse]);
+        const synapse: Synapse = new Synapse(GLOBALS.currentSynapseId++, input1);
+        this.output = new Neuron(GLOBALS.currentNeuronId++, [synapse]);
     }
 
     evaluate(): number {
@@ -49,7 +49,7 @@ export class Network {
             for (let synapse of neuron.synapses) {
                 const rnd = Math.random();
 
-                if (rnd < MLCONFIG.weightMutation) {
+                if (rnd < CONFIG.weightMutation) {
                     synapse.weight = Math.random() * 20 - 10;
                 }
             }
@@ -58,14 +58,14 @@ export class Network {
         for (let synapse of this.output.synapses) {
             const rnd = Math.random();
 
-            if (rnd < MLCONFIG.weightMutation) {
+            if (rnd < CONFIG.weightMutation) {
                 synapse.weight = Math.random() * 20 - 10;
             }
         }
 
         // mutacja dodatkowych synaps
         let rnd = Math.random();
-        if (rnd < MLCONFIG.synapseMutation) {
+        if (rnd < CONFIG.synapseMutation) {
             let mutationDone: boolean = false;
             
             const index1 = Math.floor(Math.random() * (this.hidden.length + 1 + 2 + 1)); // origin +1 output +2 input +1 bias// TODO refactor
@@ -115,7 +115,7 @@ export class Network {
 
             // tworzy calkowicie nowa mutacje
             if (!mutationDone) {
-                const newSynapse = new Synapse(INNOVATION_GENERATOR.value++, neuron1);
+                const newSynapse = new Synapse(GLOBALS.currentSynapseId++, neuron1);
                 neuron2.synapses.push(newSynapse);
                 synapseMutations.push({ origin: newSynapse.origin.id, target: neuron2.id, innovation: newSynapse.innovation });
             }      
@@ -123,7 +123,7 @@ export class Network {
 
         // to do mutacja dodatkowego neuronu
         rnd = Math.random();
-        if (rnd < MLCONFIG.neuronMutation) {
+        if (rnd < CONFIG.neuronMutation) {
             const synapses: any[] = [];
             // TODO co jesli synapse jest disabled???
             for (let neuron of this.hidden) {
@@ -154,11 +154,11 @@ export class Network {
                 }
             }
 
-            const newSynapse1: Synapse = new Synapse(INNOVATION_GENERATOR.value++, chosenSynapse.synapse.origin);
-            const newNeuron: Neuron = new Neuron(NEURON_ID_GENERATOR.value++, [newSynapse1]);
+            const newSynapse1: Synapse = new Synapse(GLOBALS.currentSynapseId++, chosenSynapse.synapse.origin);
+            const newNeuron: Neuron = new Neuron(GLOBALS.currentNeuronId++, [newSynapse1]);
             this.hidden.push(newNeuron);
 
-            const newSynapse2: Synapse = new Synapse(INNOVATION_GENERATOR.value++, newNeuron);
+            const newSynapse2: Synapse = new Synapse(GLOBALS.currentSynapseId++, newNeuron);
 
             chosenSynapse.target.synapses.push(newSynapse2);
 

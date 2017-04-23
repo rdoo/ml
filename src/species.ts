@@ -1,5 +1,5 @@
 import { Network } from './network';
-import { MLCONFIG } from './ml';
+import { CONFIG } from './ml';
 
 export class Species {
     representant: Network;
@@ -12,10 +12,10 @@ export class Species {
     }
 
     inSpecies(network: Network) {
-        const threshold: number = MLCONFIG.sameSpeciesThreshold;
-        const c1: number = MLCONFIG.c1;
-        const c2: number = MLCONFIG.c2;
-        const c3: number = MLCONFIG.c3;
+        const threshold: number = CONFIG.sameSpeciesThreshold;
+        const c1: number = CONFIG.c1;
+        const c2: number = CONFIG.c2;
+        const c3: number = CONFIG.c3;
 
         let E: number = 0; // number of excess genes
         let D: number = 0; // number of disjoint genes

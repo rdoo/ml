@@ -1,5 +1,4 @@
 import { Neuron } from './neuron';
-import { INNOVATION_GENERATOR } from './ml';
 
 export class Synapse {
     innovation: number;

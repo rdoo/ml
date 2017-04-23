@@ -94,6 +94,8 @@ const drawNetwork = (id: string, network: Network) => {
         .attr('width', 4000)
         .attr('height', 4000);
 
+    svg.append('rect').attr('width', '100%') .attr('height', '100%').attr('fill', '#F9F9FF');
+
     let layerNumber: number = 0;
     let currentNodeInLayer: number = 0;
 

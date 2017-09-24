@@ -4,16 +4,21 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "start": "webpack-dev-server --content-base build/",
+    "start": "concurrently \"webpack --watch --config webpack.config.new.js\" \"nodemon build/server.js --watch build/server.js\"",
+    "start2": "webpack-dev-server --content-base buildold/",
     "build": "webpack"
   },
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.15.4",
+    "mongodb": "^2.2.31",
+    "uws": "^8.14.1"
+  },
   "devDependencies": {
     "@types/node": "^6.0.54",
     "awesome-typescript-loader": "^3.1.2",
     "concurrently": "^3.1.0",
     "copy-webpack-plugin": "^4.0.1",
-    "nodemon": "^1.11.0",
+    "nodemon": "^1.12.1",
     "typescript": "^2.2.1",
     "uglifyjs-webpack-plugin": "^0.4.3",
     "webpack": "^2.2.1",

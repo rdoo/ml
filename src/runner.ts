@@ -9,17 +9,19 @@ export class Runner {
     speciesArray: Species[] = [];
     bestNetwork: Network;
 
+    inputData: { [key: string]: number }[];
+
     currentStep: number = 0;
 
     constructor() {
-        const network: Network = new Network();
-        network.initBasicNetwork();
+        const representantNetwork: Network = new Network();
+        representantNetwork.initBasicNetwork();
 
-        this.bestNetwork = network;
+        this.bestNetwork = representantNetwork;
         this.bestNetwork.fitness = 10000;
 
-        const newSpecies: Species = new Species(network);
-        newSpecies.networks.push(network);
+        const newSpecies: Species = new Species(representantNetwork);
+        newSpecies.networks.push(representantNetwork);
         this.speciesArray.push(newSpecies);
 
         for (let i = 0; i < CONFIG.networksNumber - 1; i++) {
@@ -42,11 +44,10 @@ export class Runner {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
                 network.fitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
-                for (let i = 0; i < 100; i++) {
-                    const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
-                    network.inputs[0].value = XOR.i1;
-                    network.inputs[1].value = XOR.i2;
-                    const errorValue: number = Math.abs(network.evaluate() - XOR.o);
+                for (const data of this.inputData) {
+                    network.inputs[0].value = data.i1;
+                    network.inputs[1].value = data.i2;
+                    const errorValue: number = Math.abs(network.evaluate() - data.o);
                     network.fitness += errorValue;
                     species.averageFitness += errorValue;
                 }

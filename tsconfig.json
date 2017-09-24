@@ -8,8 +8,5 @@
     "noImplicitAny": false,
     "outDir": "build",
     "allowJs": true
-  },
-  "exclude": [
-    "node_modules"
-  ]
+  }
 }

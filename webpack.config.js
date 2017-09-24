@@ -1,16 +1,20 @@
 const webpack = require('webpack');
 const path = require('path');
+const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+
+const nodeModules = { };
+fs.readdirSync('node_modules').filter(x => x !== '.bin').forEach(x => nodeModules[x] = 'commonjs ' + x);
 
 module.exports = {
     context: path.join(__dirname, 'src'),
     entry: {
         bundle: './visuals/index.ts',
-        worker: './ml.ts'
+        worker: './ml.ts',
     },
     output: {
-        path: path.join(__dirname, 'build'),
+        path: path.join(__dirname, 'buildold'),
         filename: '[name].js',
         libraryTarget: 'var',
         library: 'ml'

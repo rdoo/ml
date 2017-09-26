@@ -1,7 +1,7 @@
 import { Config } from './config';
 import { Globals } from './globals';
 import { Runner } from './runner';
-import { XORArray } from './xor';
+import { XORArray } from './data/xor';
 
 export let CONFIG: Config;
 export let GLOBALS: Globals;
@@ -12,8 +12,9 @@ for (let i = 0; i < 100; i++) {
     inputData.push(XOR);
 }
 
-onmessage = (event) => {
-    CONFIG = event.data[0];
+process.on('message', message => {
+    CONFIG = JSON.parse(message);
+    console.log(CONFIG);
     GLOBALS = new Globals();
 
     const runner: Runner = new Runner();
@@ -24,4 +25,4 @@ onmessage = (event) => {
     }
 
     runner.printResults();
-}
+});

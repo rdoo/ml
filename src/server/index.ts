@@ -1,3 +1,4 @@
+import { ChildProcess, fork } from 'child_process';
 import { Express } from 'express';
 import * as express from 'express';
 import { createServer, Server } from 'http';
@@ -15,10 +16,32 @@ const port: string = process.env.PORT || '8080';
 
 server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - Server is listening on port ' + server.address().port));
 
+let ml: ChildProcess;
+
 wsServer.on('connection', ws => {
+
     ws.send('hello');
 
+    if (ml !== undefined) {
+        ml.on('message', message => {
+            ws.send(message);
+        });
+    }
+
     ws.on('message', message => {
-        console.log(message);
+        switch (message.substring(0, 2)) {
+            case 'ST':
+                ml = fork('build/worker.js');
+                ml.send(message.substring(2));
+                ml.on('message', message => {
+                    ws.send(message);
+                });
+                ml.on('exit', () => console.log('Process got killed'));
+                break;
+            case 'SP':
+                ml.kill();
+                break;
+        }
+        
     });
 });

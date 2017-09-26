@@ -1,9 +1,8 @@
-declare function postMessage(value?: any): any;
-
+import { CONFIG } from './ml';
 import { Network } from './network';
 import { Species } from './species';
-import { XORArray } from './xor';
-import { CONFIG } from './ml';
+
+// declare function postMessage(value?: any): any;
 
 export class Runner {
     speciesArray: Species[] = [];
@@ -30,11 +29,11 @@ export class Runner {
             newSpecies.networks.push(network);
         }
 
-        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+        // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 
     printResults() {
-        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+        // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 
     run() {
@@ -84,7 +83,8 @@ export class Runner {
         }
 
         if (this.currentStep % 50 === 0) {
-            postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+            // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+            console.log(this.currentStep);
         }
 
         // TODO wszystkie networks trzeba przeorganizowac w nowe species????
@@ -266,6 +266,6 @@ export class Runner {
         species3.networks.push(child);
 
         this.speciesArray = [species1, species2, species3];
-        postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+        // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
     }
 }

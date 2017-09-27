@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Config } from '../config';
+import { CanvasComponent } from './canvas';
 
 export class App extends React.Component {
     ws: WebSocket;
@@ -18,10 +19,12 @@ export class App extends React.Component {
         sameSpeciesThreshold: 1.0
     };
 
+    state: any;
+
     constructor(props) {
         super(props);
 
-        this.state = { };
+        this.state = { step: 0, bestNetwork: { }, speciesArray: [] };
     }
 
     componentDidMount() {
@@ -30,9 +33,7 @@ export class App extends React.Component {
         this.ws = new WebSocket(protocol + window.location.host);
         
         this.ws.onmessage = (message) => {
-            console.log(message.data);
-        
-            this.ws.send('lel');
+            this.setState(JSON.parse(message.data));
         }
     }
 
@@ -59,6 +60,9 @@ export class App extends React.Component {
                 C2: <input defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
                 C3: <input defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
                 Species threshold: <input defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
+                <div>Current step: {this.state.step}</div>
+                <div>Species: {this.state.speciesArray.length}</div>
+                <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
             </div>
         );
     }

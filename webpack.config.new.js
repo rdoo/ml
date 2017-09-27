@@ -49,8 +49,7 @@ module.exports = [
         },
         plugins: [
             new CopyWebpackPlugin([
-                { from: path.join(__dirname, 'src', 'client', 'index.html') },
-                { from: path.join(__dirname, 'src', 'visuals', 'd3.min.js') }
+                { from: path.join(__dirname, 'src', 'client', 'index.html') }
             ]),
             // new UglifyJSPlugin()
         ]

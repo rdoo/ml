@@ -20,7 +20,7 @@ let ml: ChildProcess;
 
 wsServer.on('connection', ws => {
 
-    ws.send('hello');
+    // ws.send('hello');
 
     if (ml !== undefined) {
         ml.on('message', message => {

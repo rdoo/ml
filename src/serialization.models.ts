@@ -25,3 +25,9 @@ export interface SpeciesSerialized {
     averageFitness: number;
     desiredPopulation: number; // todo needed?
 }
+
+export interface StateSerialized {
+    step: number;
+    bestNetwork: NetworkSerialized;
+    speciesArray: SpeciesSerialized;
+}

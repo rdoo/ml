@@ -40,7 +40,7 @@ export class Runner {
         for (const species of this.speciesArray) {
             speciesArray.push(species.serialize());
         }
-        process.send(JSON.stringify({ step: this.currentStep, bestNetwork: this.bestNetwork.serialize(), species: speciesArray }));
+        process.send(JSON.stringify({ step: this.currentStep, bestNetwork: this.bestNetwork.serialize(), speciesArray: speciesArray }));
     }
 
     run() {

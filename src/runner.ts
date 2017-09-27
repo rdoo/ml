@@ -1,3 +1,4 @@
+import { SpeciesSerialized } from './serialization.models';
 import { CONFIG } from './ml';
 import { Network } from './network';
 import { Species } from './species';
@@ -30,10 +31,16 @@ export class Runner {
         }
 
         // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+        this.printResults();
     }
 
     printResults() {
         // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+        const speciesArray: SpeciesSerialized[] = [];
+        for (const species of this.speciesArray) {
+            speciesArray.push(species.serialize());
+        }
+        process.send(JSON.stringify({ step: this.currentStep, bestNetwork: this.bestNetwork.serialize(), species: speciesArray }));
     }
 
     run() {

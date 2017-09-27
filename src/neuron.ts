@@ -4,7 +4,8 @@ export class Neuron {
     id: number;
     synapses: Synapse[];
     value: number = 0;
-    calculating: boolean = false;
+
+    calculating: boolean = false; // todo used only to evaluate network?
 
     constructor(id: number, synapses: Synapse[] = []) {
         this.id = id;

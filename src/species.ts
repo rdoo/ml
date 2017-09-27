@@ -1,5 +1,6 @@
-import { Network } from './network';
 import { CONFIG } from './ml';
+import { Network } from './network';
+import { NetworkSerialized, SpeciesSerialized } from './serialization.models';
 
 export class Species {
     representant: Network;
@@ -165,5 +166,14 @@ export class Species {
         } else {
             return false;
         }
+    }
+
+    serialize(): SpeciesSerialized {
+        const networks: NetworkSerialized[] = [];
+        for (const network of this.networks) {
+            networks.push(network.serialize());
+        }
+
+        return { representant: this.representant.serialize(), networks, averageFitness: this.averageFitness, desiredPopulation: this.desiredPopulation };
     }
 }

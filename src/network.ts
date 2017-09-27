@@ -1,8 +1,8 @@
-import { Synapse } from './synapse';
-import { Neuron } from './neuron';
 import { SynapseWithTarget } from './globals';
-
 import { CONFIG, GLOBALS } from './ml';
+import { Neuron } from './neuron';
+import { NetworkSerialized, NeuronSerialized, SynapseSerialized } from './serialization.models';
+import { Synapse } from './synapse';
 
 export class Network {
     inputs: Neuron[] = [];
@@ -249,6 +249,27 @@ export class Network {
         networkCopy.fitness = this.fitness;
 
         return networkCopy;
+    }
+
+    serialize(): NetworkSerialized {
+        const synapses: SynapseSerialized[] = [];
+        const inputs: NeuronSerialized[] = [];
+        for (const neuron of this.inputs) {
+            inputs.push({ id: neuron.id, value: neuron.value}); // todo czy inputy moga miec synapsy?
+        }
+        const hidden: NeuronSerialized[] = [];
+        for (const neuron of this.hidden) {
+            hidden.push({ id: neuron.id, value: neuron.value});
+            for (const synapse of neuron.synapses) {
+                synapses.push({ innovation: synapse.innovation, weight: synapse.weight, enabled: synapse.enabled, originId: synapse.origin.id, targetId: neuron.id });
+            }
+        }
+        const output: NeuronSerialized = { id: this.output.id, value: this.output.value };
+        for (const synapse of this.output.synapses) {
+            synapses.push({ innovation: synapse.innovation, weight: synapse.weight, enabled: synapse.enabled, originId: synapse.origin.id, targetId: this.output.id });
+        }
+
+        return { inputs, hidden, output, synapses, fitness: this.fitness };
     }
 
     toString() {

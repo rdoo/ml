@@ -2,6 +2,7 @@ import { Config } from './config';
 import { Globals } from './globals';
 import { Runner } from './runner';
 import { XORArray } from './data/xor';
+import { Network } from './network';
 
 export let CONFIG: Config;
 export let GLOBALS: Globals;

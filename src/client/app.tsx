@@ -63,6 +63,12 @@ export class App extends React.Component {
                 <div>Species: {this.state.speciesArray.length}</div>
                 <div>Best fitness: {this.state.bestNetwork.fitness || 'none'}</div>
                 <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
+                {this.state.speciesArray.map((species, i) => {
+                    return <div key={i}>
+                            <div>Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[0].fitness}</div>
+                            <CanvasComponent data={species.networks[0]}></CanvasComponent>
+                        </div>;
+                })}
             </div>
         );
     }

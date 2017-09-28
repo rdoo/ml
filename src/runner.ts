@@ -89,8 +89,9 @@ export class Runner {
             }
         }
 
-        if (this.currentStep % 50 === 0) {
+        if (this.currentStep % 100 === 0) {
             // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
+            this.printResults();
             console.log(this.currentStep);
         }
 

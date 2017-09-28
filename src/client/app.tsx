@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Config } from '../config';
+import { NetworkSerialized, StateSerialized } from '../serialization.models';
 import { CanvasComponent } from './canvas';
 
 export class App extends React.Component {
@@ -19,12 +20,10 @@ export class App extends React.Component {
         sameSpeciesThreshold: 1.0
     };
 
-    state: any;
+    state: StateSerialized = { step: 0, bestNetwork: ({ } as NetworkSerialized), speciesArray: [] };
 
     constructor(props) {
         super(props);
-
-        this.state = { step: 0, bestNetwork: { }, speciesArray: [] };
     }
 
     componentDidMount() {
@@ -62,6 +61,7 @@ export class App extends React.Component {
                 Species threshold: <input defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
                 <div>Current step: {this.state.step}</div>
                 <div>Species: {this.state.speciesArray.length}</div>
+                <div>Best fitness: {this.state.bestNetwork.fitness || 'none'}</div>
                 <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
             </div>
         );

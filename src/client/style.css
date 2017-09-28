@@ -1,0 +1,10 @@
+input {
+    width: 50px;
+}
+
+.container {
+    width: 99%;
+    height: 400px;
+    overflow: auto;
+    border: 1px solid black;
+}

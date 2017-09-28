@@ -29,5 +29,5 @@ export interface SpeciesSerialized {
 export interface StateSerialized {
     step: number;
     bestNetwork: NetworkSerialized;
-    speciesArray: SpeciesSerialized;
+    speciesArray: SpeciesSerialized[];
 }

@@ -1,36 +1,75 @@
+import { createWriteStream, readFile } from 'fs';
 import { Collection, MongoClient } from 'mongodb';
 
-const MONGO_URL: string = '';
+const MONGO_URL: string = process.env.MONGO_URL || '';
 
-const date: string = '2017-09-08';
-const ticker: string = 'PZU';
+export function getStringDataFromMongo(ticker: string, date: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+        const resultArray: string[] = [];
 
-const resultArray: string[] = [];
-
-MongoClient.connect(MONGO_URL, (error, db) => {
-    if (error) {
-        console.error(error);
-    } else {
-        const collection: Collection = db.collection('wse');
-
-        collection.findOne({ date }, (error, result) => {
+        MongoClient.connect(MONGO_URL, (error, db) => {
             if (error) {
                 console.error(error);
             } else {
-                console.log('Result:');
+                const collection: Collection = db.collection('wse');
 
-                if (!result.data) {
-                    throw('No data');
-                }
+                collection.findOne({ date }, (error, result) => {
+                    if (error) {
+                        console.error(error);
+                        reject();
+                    } else {
+                        console.log('Result:');
 
-                for (const line of result.data) {
-                    if (line.indexOf('T2,' + ticker) !== -1) {
-                        resultArray.push(line);
+                        if (!result.data) {
+                            throw('No data');
+                        }
+
+                        for (const line of result.data) {
+                            if (line.indexOf('T2,' + ticker) !== -1) {
+                                resultArray.push(line);
+                            }
+                        }
                     }
-                }
-                console.log(resultArray);
+
+                    db.close();
+                    resolve(resultArray);
+                });
             }
-            db.close();
         });
+    });
+}
+
+export function getStringDataFromFile(): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+        readFile('build/data.txt', 'utf8', (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data.split('\n'));
+            }
+        });
+    });
+}
+
+export function saveDataToFile(array: string[]) {
+    const writer = createWriteStream('datax.txt', { flags: 'a' });
+
+    for (const line of array) {
+        writer.write(line + '\n');
     }
-});
+}
+
+export function transformData(array: string[]) {
+    const data: any[] = [];
+
+    for (const item of array) {
+        const splitItem: string[] = item.split(',');
+        const time: string = splitItem[2];
+
+        if (time !== '090000' && time < '170000') {
+            data.push({ price: Number(splitItem[5]), volume: Number(splitItem[6]), time });
+        }
+    }
+
+    return data;
+}

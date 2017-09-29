@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Config } from '../config';
 import { NetworkSerialized, StateSerialized } from '../serialization.models';
 import { CanvasComponent } from './canvas';
+import { CheckComponent } from './check';
 
 export class App extends React.Component {
     ws: WebSocket;
@@ -23,6 +24,13 @@ export class App extends React.Component {
     state: StateSerialized = { step: 0, bestNetwork: ({ } as NetworkSerialized), speciesArray: [] };
     currentlyViewed: number[];
 
+    inputData: any[];
+    chosenNetwork: NetworkSerialized;
+    networkShown: boolean = false;
+
+    ticker: string = 'PZU';
+    date: string = '2017-09-08';
+
     constructor(props) {
         super(props);
     }
@@ -33,9 +41,14 @@ export class App extends React.Component {
         this.ws = new WebSocket(protocol + window.location.host);
         
         this.ws.onmessage = (message) => {
-            const newState: StateSerialized = JSON.parse(message.data);
-            this.currentlyViewed = newState.speciesArray.map(species => 0);
-            this.setState(newState);
+            const newState: any = JSON.parse(message.data);
+            if (newState.step !== undefined) {
+                this.currentlyViewed = newState.speciesArray.map(species => 0);
+                this.setState(newState);
+            } else {
+                this.inputData = newState;
+                console.log(this.inputData);
+            }
         }
     }
 
@@ -45,6 +58,21 @@ export class App extends React.Component {
 
     stop() {
         this.ws.send('SP');
+    }
+
+    getData() {
+        this.ws.send('DA' + this.ticker + ':' + this.date);
+    }
+
+    showNetwork(network: NetworkSerialized) {
+        this.networkShown = true;
+        this.chosenNetwork = network;
+        this.forceUpdate();
+    }
+
+    hideNetwork() {
+        this.networkShown = false;
+        this.forceUpdate();
     }
 
     render() {
@@ -62,10 +90,16 @@ export class App extends React.Component {
                 C2: <input defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
                 C3: <input defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
                 Species threshold: <input defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
-                <div>Current step: {this.state.step}</div>
-                <div>Species: {this.state.speciesArray.length}</div>
-                <div>Best fitness: {this.state.bestNetwork.fitness || 'none'}</div>
-                <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
+                <div>
+                    <button onClick={() => this.getData()}>GET DATA</button>
+                </div>
+                {this.state.bestNetwork.fitness && <div>
+                    <div>Current step: {this.state.step}</div>
+                    <div>Species: {this.state.speciesArray.length}</div>
+                    <div>Best fitness: {this.state.bestNetwork.fitness}</div>
+                    <button onClick={() => this.showNetwork(this.state.bestNetwork)}>SHOW</button>
+                    <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
+                </div>}
                 {this.state.speciesArray.map((species, i) => {
                     return <div key={i}>
                             <div>
@@ -73,11 +107,13 @@ export class App extends React.Component {
                                 <input defaultValue={String(this.currentlyViewed[i])} onInput={event => { this.currentlyViewed[i] = Number((event.target as HTMLInputElement).value); this.forceUpdate(); }}/>
                                 <button disabled={this.currentlyViewed[i] <= 0} onClick={() => { this.currentlyViewed[i]--; this.forceUpdate(); }}>PREV</button>
                                 <button disabled={this.currentlyViewed[i] >= (species.networks.length - 1)} onClick={() => { this.currentlyViewed[i]++; this.forceUpdate(); }}>NEXT</button>
+                                <button onClick={() => this.showNetwork(species.networks[this.currentlyViewed[i]])}>SHOW</button>
                                 Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[this.currentlyViewed[i]].fitness}
                             </div>
                             <CanvasComponent data={species.networks[this.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
+                { this.networkShown && <CheckComponent network={this.chosenNetwork} data={this.inputData} onClick={() => this.hideNetwork()}></CheckComponent>}
             </div>
         );
     }

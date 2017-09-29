@@ -64,8 +64,7 @@ module.exports = [
         },
         context: path.join(__dirname, 'src'),
         entry: {
-            server: './server/index.ts',
-            generator: './data/generator.ts'
+            server: './server/index.ts'
         },
         output: {
             path: path.join(__dirname, 'build'),
@@ -80,6 +79,9 @@ module.exports = [
             ]
         },
         plugins: [
+            new CopyWebpackPlugin([
+                { from: path.join(__dirname, 'src', 'data', 'data.txt') }
+            ]),
             // new UglifyJSPlugin()
         ]
     }

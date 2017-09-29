@@ -26,7 +26,8 @@ export class CanvasComponent extends React.Component {
             this.draw();
         }
     }
-     componentDidUpdate() {
+
+    componentDidUpdate() {
         this.draw();
     }
 

@@ -8,6 +8,7 @@
     "noImplicitAny": false,
     "outDir": "build",
     "allowJs": true,
-    "jsx": "react"
+    "jsx": "react",
+    "lib": ["es2017", "dom"]
   }
 }

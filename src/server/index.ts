@@ -1,3 +1,4 @@
+import { getStringDataFromFile, getStringDataFromMongo, transformData } from '../data/generator';
 import { ChildProcess, fork } from 'child_process';
 import { Express } from 'express';
 import * as express from 'express';
@@ -16,7 +17,11 @@ const port: string = process.env.PORT || '8080';
 
 server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - Server is listening on port ' + server.address().port));
 
+
+
 let ml: ChildProcess;
+
+let inputData: any[];
 
 wsServer.on('connection', ws => {
 
@@ -40,6 +45,13 @@ wsServer.on('connection', ws => {
                 break;
             case 'SP':
                 ml.kill();
+                break;
+            case 'DA':
+                const [ticker, date] = message.substring(2).split(':');
+                getStringDataFromFile().then(data => transformData(data)).then(data => {
+                    inputData = data;
+                    ws.send(JSON.stringify(data));
+                });
                 break;
         }
         

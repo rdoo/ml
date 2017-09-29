@@ -21,6 +21,7 @@ export class App extends React.Component {
     };
 
     state: StateSerialized = { step: 0, bestNetwork: ({ } as NetworkSerialized), speciesArray: [] };
+    currentlyViewed: number[];
 
     constructor(props) {
         super(props);
@@ -32,7 +33,9 @@ export class App extends React.Component {
         this.ws = new WebSocket(protocol + window.location.host);
         
         this.ws.onmessage = (message) => {
-            this.setState(JSON.parse(message.data));
+            const newState: StateSerialized = JSON.parse(message.data);
+            this.currentlyViewed = newState.speciesArray.map(species => 0);
+            this.setState(newState);
         }
     }
 
@@ -65,8 +68,14 @@ export class App extends React.Component {
                 <CanvasComponent data={this.state.bestNetwork}></CanvasComponent>
                 {this.state.speciesArray.map((species, i) => {
                     return <div key={i}>
-                            <div>Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[0].fitness}</div>
-                            <CanvasComponent data={species.networks[0]}></CanvasComponent>
+                            <div>
+                                Number: {this.currentlyViewed[i]}
+                                <input defaultValue={String(this.currentlyViewed[i])} onInput={event => { this.currentlyViewed[i] = Number((event.target as HTMLInputElement).value); this.forceUpdate(); }}/>
+                                <button disabled={this.currentlyViewed[i] <= 0} onClick={() => { this.currentlyViewed[i]--; this.forceUpdate(); }}>PREV</button>
+                                <button disabled={this.currentlyViewed[i] >= (species.networks.length - 1)} onClick={() => { this.currentlyViewed[i]++; this.forceUpdate(); }}>NEXT</button>
+                                Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[this.currentlyViewed[i]].fitness}
+                            </div>
+                            <CanvasComponent data={species.networks[this.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
             </div>

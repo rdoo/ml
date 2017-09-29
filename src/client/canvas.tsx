@@ -13,6 +13,7 @@ const EVEN_Y_OFFSET: number = 25;
 export class CanvasComponent extends React.Component {
     node: SVGElement;
     props: { data: NetworkSerialized };
+    state = { clicked: false };
 
 
     constructor(props) {
@@ -170,8 +171,8 @@ export class CanvasComponent extends React.Component {
 
     render() {
         return (
-            <div className="container">
-                <svg ref={node => this.node = node} width={4000} height={4000}></svg>
+            <div className={'container' + (this.state.clicked ? ' clicked' : '') }>
+                <svg ref={node => this.node = node} width={4000} height={4000} onClick={() => this.setState({ clicked: !this.state.clicked })}></svg>
             </div>
         );
     }

@@ -11,6 +11,7 @@ interface AppState {
     inputData: any[];
     chosenNetwork: NetworkSerialized;
     running: boolean;
+    paused: boolean;
 }
 
 export class App extends React.Component {
@@ -39,18 +40,19 @@ export class App extends React.Component {
     }
 
     componentDidMount() {
+        this.setState({ paused: false });
         const protocol: string = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
         
         this.ws = new WebSocket(protocol + window.location.host);
         
         this.ws.onmessage = (message) => {
             const newState: any = JSON.parse(message.data);
-            if (newState.step !== undefined) {
+            if (newState.step !== undefined && !this.state.paused) {
                 const currentlyViewed: number[] = newState.speciesArray.map(species => 0);
                 this.setState({ mlState: newState, currentlyViewed });
             } else if (newState.running !== undefined) {
                 this.setState(newState);
-            } else {
+            } else if (newState.length > 0) {
                 this.setState({ inputData: newState });
             }
         }
@@ -62,6 +64,10 @@ export class App extends React.Component {
 
     stop() {
         this.ws.send('SP');
+    }
+
+    pause() {
+        this.setState({ paused: !this.state.paused });
     }
 
     // getData() {
@@ -96,7 +102,8 @@ export class App extends React.Component {
         return (
             <div>
                 <button disabled={this.state && this.state.running} onClick={() => this.start()}>START</button>
-                <button onClick={() => this.stop()}>STOP</button>
+                <button disabled={this.state && !this.state.running} onClick={() => this.pause()}>{this.state && this.state.paused ? 'UNPAUSE' : 'PAUSE'}</button>
+                <button disabled={this.state && !this.state.running} onClick={() => this.stop()}>STOP</button>
                 Networks #: <input disabled={this.state && this.state.running} defaultValue={String(this.config.networksNumber)} onKeyUp={event => this.config.networksNumber = Number((event.target as HTMLInputElement).value)} />
                 Culling %: <input disabled={this.state && this.state.running} defaultValue={String(this.config.cullingPercent)} onKeyUp={event => this.config.cullingPercent = Number((event.target as HTMLInputElement).value)} />
                 Fitness threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.fitnessThreshold)} onKeyUp={event => this.config.fitnessThreshold = Number((event.target as HTMLInputElement).value)} />

@@ -22,4 +22,5 @@ process.on('message', message => {
 
     console.log('Simulation ended')
     runner.printResults();
+    process.exit();
 });

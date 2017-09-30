@@ -1,5 +1,5 @@
 import { SpeciesSerialized } from './serialization.models';
-import { CONFIG } from './ml';
+import { CONFIG, GLOBALS } from './ml';
 import { Network } from './network';
 import { Species } from './species';
 
@@ -40,7 +40,7 @@ export class Runner {
         for (const species of this.speciesArray) {
             speciesArray.push(species.serialize());
         }
-        process.send(JSON.stringify({ step: this.currentStep, bestNetwork: this.bestNetwork.serialize(), speciesArray: speciesArray }));
+        process.send(JSON.stringify({ step: this.currentStep, bestNetwork: this.bestNetwork.serialize(), speciesArray: speciesArray, globals: GLOBALS }));
     }
 
     run() {

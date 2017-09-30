@@ -46,6 +46,11 @@ module.exports = [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'client', 'index.html') }
             ]),
+            new webpack.DefinePlugin({
+                'process.env': {
+                    NODE_ENV: JSON.stringify('production')
+                }
+            }),
             new UglifyJSPlugin()
         ]
     },

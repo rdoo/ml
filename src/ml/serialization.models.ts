@@ -1,3 +1,5 @@
+import { Globals } from './globals';
+
 export interface NeuronSerialized {
     id: number;
     value: number; // todo potrzebne tylko dla inputow czy dla wszystkich ze wzgledu na polaczenia wsteczne?
@@ -30,4 +32,5 @@ export interface StateSerialized {
     step: number;
     bestNetwork: NetworkSerialized;
     speciesArray: SpeciesSerialized[];
+    globals: Globals
 }

@@ -10,6 +10,7 @@ interface AppState {
     currentlyViewed: number[];
     inputData: any[];
     chosenNetwork: NetworkSerialized;
+    running: boolean;
 }
 
 export class App extends React.Component {
@@ -47,6 +48,8 @@ export class App extends React.Component {
             if (newState.step !== undefined) {
                 const currentlyViewed: number[] = newState.speciesArray.map(species => 0);
                 this.setState({ mlState: newState, currentlyViewed });
+            } else if (newState.running !== undefined) {
+                this.setState(newState);
             } else {
                 this.setState({ inputData: newState });
             }
@@ -92,18 +95,18 @@ export class App extends React.Component {
     render() {
         return (
             <div>
-                <button onClick={() => this.start()}>START</button>
+                <button disabled={this.state && this.state.running} onClick={() => this.start()}>START</button>
                 <button onClick={() => this.stop()}>STOP</button>
-                Networks #: <input defaultValue={String(this.config.networksNumber)} onKeyUp={event => this.config.networksNumber = Number((event.target as HTMLInputElement).value)} />
-                Culling %: <input defaultValue={String(this.config.cullingPercent)} onKeyUp={event => this.config.cullingPercent = Number((event.target as HTMLInputElement).value)} />
-                Fitness threshold: <input defaultValue={String(this.config.fitnessThreshold)} onKeyUp={event => this.config.fitnessThreshold = Number((event.target as HTMLInputElement).value)} />
-                Weight mut: <input defaultValue={String(this.config.weightMutation)} onKeyUp={event => this.config.weightMutation = Number((event.target as HTMLInputElement).value)} />
-                Synapse mut: <input defaultValue={String(this.config.synapseMutation)} onKeyUp={event => this.config.synapseMutation = Number((event.target as HTMLInputElement).value)} />
-                Neuron mut: <input defaultValue={String(this.config.neuronMutation)} onKeyUp={event => this.config.neuronMutation = Number((event.target as HTMLInputElement).value)} />
-                C1: <input defaultValue={String(this.config.c1)} onKeyUp={event => this.config.c1 = Number((event.target as HTMLInputElement).value)} />
-                C2: <input defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
-                C3: <input defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
-                Species threshold: <input defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
+                Networks #: <input disabled={this.state && this.state.running} defaultValue={String(this.config.networksNumber)} onKeyUp={event => this.config.networksNumber = Number((event.target as HTMLInputElement).value)} />
+                Culling %: <input disabled={this.state && this.state.running} defaultValue={String(this.config.cullingPercent)} onKeyUp={event => this.config.cullingPercent = Number((event.target as HTMLInputElement).value)} />
+                Fitness threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.fitnessThreshold)} onKeyUp={event => this.config.fitnessThreshold = Number((event.target as HTMLInputElement).value)} />
+                Weight mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.weightMutation)} onKeyUp={event => this.config.weightMutation = Number((event.target as HTMLInputElement).value)} />
+                Synapse mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.synapseMutation)} onKeyUp={event => this.config.synapseMutation = Number((event.target as HTMLInputElement).value)} />
+                Neuron mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.neuronMutation)} onKeyUp={event => this.config.neuronMutation = Number((event.target as HTMLInputElement).value)} />
+                C1: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c1)} onKeyUp={event => this.config.c1 = Number((event.target as HTMLInputElement).value)} />
+                C2: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
+                C3: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
+                Species threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
                 {/* <div>
                     <button onClick={() => this.getData()}>GET DATA</button>
                 </div> */}

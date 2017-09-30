@@ -39,7 +39,7 @@ getStringDataFromFile().then(data => transformData(data)).then(data => {
 
 wsServer.on('connection', ws => {
 
-    // ws.send('hello');
+    ws.send(JSON.stringify({ running: !!(ml && ml.connected) }));
     if (inputData !== undefined) {
         ws.send(inputData);
     }
@@ -63,9 +63,11 @@ wsServer.on('connection', ws => {
                     ws.send(message);
                 });
                 ml.on('exit', () => console.log('Process got killed'));
+                ws.send(JSON.stringify({ running: !!(ml && ml.connected) }));
                 break;
             case 'SP':
                 ml.kill();
+                setTimeout(() => ws.send(JSON.stringify({ running: !!(ml && ml.connected) })), 100);
                 break;
             // case 'DA':
             //     const [ticker, date] = message.substring(2).split(':');

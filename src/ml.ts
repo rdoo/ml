@@ -16,9 +16,10 @@ process.on('message', message => {
     const runner: Runner = new Runner();
     runner.inputData = inputData;
 
-    while (runner.bestNetwork.fitness > CONFIG.fitnessThreshold) {
+    while (runner.bestNetwork.fitness < CONFIG.fitnessThreshold) {
         runner.run();
     }
 
+    console.log('Simulation ended')
     runner.printResults();
 });

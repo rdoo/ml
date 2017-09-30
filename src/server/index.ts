@@ -26,16 +26,16 @@ let ml: ChildProcess;
 let inputData: string;
 let outputData: string;
 
-// getStringDataFromFile().then(data => transformData(data)).then(data => {
-//     inputData = JSON.stringify(data);
-// });
+getStringDataFromFile().then(data => transformData(data)).then(data => {
+    inputData = JSON.stringify(data);
+});
 
-const xorData: any[] = [];
-for (let i = 0; i < 100; i++) {
-    const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
-    xorData.push(XOR);
-}
-inputData = JSON.stringify(xorData);
+// const xorData: any[] = [];
+// for (let i = 0; i < 100; i++) {
+//     const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
+//     xorData.push(XOR);
+// }
+// inputData = JSON.stringify(xorData);
 
 wsServer.on('connection', ws => {
 

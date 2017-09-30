@@ -18,7 +18,7 @@ export class Runner {
         representantNetwork.initBasicNetwork();
 
         this.bestNetwork = representantNetwork;
-        this.bestNetwork.fitness = 10000;
+        this.bestNetwork.fitness = 0;
 
         const newSpecies: Species = new Species(representantNetwork);
         newSpecies.networks.push(representantNetwork);
@@ -49,19 +49,35 @@ export class Runner {
         for (let species of this.speciesArray) {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
-                network.fitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+                network.fitness = 500; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+                let priceBought: number = 0;
                 for (const data of this.inputData) {
+                    /*
                     network.inputs[0].value = data.i1;
                     network.inputs[1].value = data.i2;
                     const errorValue: number = Math.abs(network.evaluate() - data.o);
                     network.fitness += errorValue;
                     species.averageFitness += errorValue;
+                    */
+                    network.inputs[0].value = data.price;
+                    network.inputs[1].value = data.volume;
+                    const evaluate: number = network.evaluate();
+
+                    if (evaluate > 0.75 && priceBought === 0) {
+                        priceBought = data.price;
+                    } else if (evaluate < 0.25 && priceBought !== 0) {
+                        const balance: number = ((data.price - priceBought) / priceBought) * 100; // dzwignia 100
+                        network.fitness += balance;
+                        priceBought = 0;
+                    }
                 }
+                species.averageFitness += network.fitness;
             }
             species.averageFitness = species.averageFitness / species.networks.length;
             sumOfAverageFitnesses += species.averageFitness;
         }
 
+        /*
         // TODO srednia fitnessu liczymy przed ubojem czy po?
 
         let sumaCzastek: number = 0; // do przemyslenia i to powaznie
@@ -81,18 +97,24 @@ export class Runner {
 
         this.speciesArray[this.speciesArray.length - 1].desiredPopulation += CONFIG.networksNumber - sumOfNewNetworks; // ostatnio powstalemu species dokladamy pozostajace miejsca
 
-        this.culling();
-        
+        */
+
         for (let species of this.speciesArray) {
-            if (species.networks[0].fitness < this.bestNetwork.fitness) {
-                this.bestNetwork = species.networks[0].deepCopy();
-            }
+            species.desiredPopulation = Math.floor((species.averageFitness / sumOfAverageFitnesses) * CONFIG.networksNumber);
         }
 
         if (this.currentStep % 100 === 0) {
             // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
             this.printResults();
             console.log(this.currentStep);
+        }
+
+        this.culling();
+        
+        for (let species of this.speciesArray) {
+            if (species.networks[0].fitness > this.bestNetwork.fitness) {
+                this.bestNetwork = species.networks[0].deepCopy();
+            }
         }
 
         // TODO wszystkie networks trzeba przeorganizowac w nowe species????
@@ -132,7 +154,7 @@ export class Runner {
     culling() {
         for (let species of this.speciesArray) {
             species.networks.sort((network1, network2) => {
-                return network1.fitness - network2.fitness;
+                return network2.fitness - network1.fitness;
             });
 
             const numberOfGettingCulled: number = Math.floor(species.networks.length * CONFIG.cullingPercent);

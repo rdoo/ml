@@ -38,3 +38,9 @@ input {
     overflow: auto;
     border: 1px solid black;
 }
+
+/* linia na pelna szerokosc wykresu */
+hr {
+    position: sticky;
+    left: 0;
+}

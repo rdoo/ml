@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Config } from '../config';
-import { NetworkSerialized, StateSerialized } from '../serialization.models';
+import { Config } from '../ml/config';
+import { NetworkSerialized, StateSerialized } from '../ml/serialization.models';
 import { CanvasComponent } from './canvas';
 import { CheckComponent } from './check';
 

@@ -56,7 +56,7 @@ wsServer.on('connection', ws => {
     ws.on('message', message => {
         switch (message.substring(0, 2)) {
             case 'ST':
-                ml = fork('build/worker.js');
+                ml = fork('build/ml.js');
                 ml.send(JSON.stringify({ config: message.substring(2), inputData }));
                 ml.on('message', message => {
                     outputData = message;

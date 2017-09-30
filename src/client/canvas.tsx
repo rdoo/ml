@@ -1,7 +1,7 @@
 import { select } from 'd3-selection';
 import * as React from 'react';
 
-import { NetworkSerialized, NeuronSerialized, SynapseSerialized } from '../serialization.models';
+import { NetworkSerialized, NeuronSerialized, SynapseSerialized } from '../ml/serialization.models';
 
 const X_MULTIPLIER: number = 300;
 const Y_MULTIPLIER: number = 100;

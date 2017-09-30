@@ -10,13 +10,10 @@ fs.readdirSync('node_modules').filter(x => x !== '.bin').forEach(x => nodeModule
 module.exports = [
     {
         target: 'node',
-        context: path.join(__dirname, 'src'),
-        entry: {
-            worker: './ml.ts',
-        },
+        entry: path.join(__dirname, 'src', 'ml', 'ml.ts'),
         output: {
             path: path.join(__dirname, 'build'),
-            filename: '[name].js'
+            filename: 'ml.js'
         },
         resolve: {
             extensions: ['.js', '.ts']
@@ -27,17 +24,14 @@ module.exports = [
             ]
         },
         plugins: [
-            // new UglifyJSPlugin()
+            new UglifyJSPlugin()
         ]
     },
     {
-        context: path.join(__dirname, 'src'),
-        entry: {
-            bundle: './client/index.tsx'
-        },
+        entry: path.join(__dirname, 'src', 'client', 'index.tsx'),
         output: {
             path: path.join(__dirname, 'build', 'client'),
-            filename: '[name].js'
+            filename: 'bundle.js'
         },
         resolve: {
             extensions: ['.js', '.ts', '.tsx']
@@ -52,7 +46,7 @@ module.exports = [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'client', 'index.html') }
             ]),
-            // new UglifyJSPlugin()
+            new UglifyJSPlugin()
         ]
     },
     {
@@ -62,13 +56,10 @@ module.exports = [
             __filename: false,
             __dirname: false
         },
-        context: path.join(__dirname, 'src'),
-        entry: {
-            server: './server/index.ts'
-        },
+        entry: path.join(__dirname, 'src', 'server', 'index.ts'),
         output: {
             path: path.join(__dirname, 'build'),
-            filename: '[name].js'
+            filename: 'server.js'
         },
         resolve: {
             extensions: ['.js', '.ts']
@@ -82,7 +73,7 @@ module.exports = [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'data', 'data.txt') }
             ]),
-            // new UglifyJSPlugin()
+            new UglifyJSPlugin()
         ]
     }
 ];

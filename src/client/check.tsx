@@ -1,10 +1,10 @@
 import { select } from 'd3-selection';
 import * as React from 'react';
 
-import { Network } from '../network';
-import { Neuron } from '../neuron';
-import { NetworkSerialized } from '../serialization.models';
-import { Synapse } from '../synapse';
+import { Network } from '../ml/network';
+import { Neuron } from '../ml/neuron';
+import { NetworkSerialized } from '../ml/serialization.models';
+import { Synapse } from '../ml/synapse';
 import { CanvasComponent } from './canvas';
 
 export class CheckComponent extends React.Component {

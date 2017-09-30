@@ -1,10 +1,11 @@
-import { getStringDataFromFile, getStringDataFromMongo, transformData } from '../data/generator';
 import { ChildProcess, fork } from 'child_process';
 import { Express } from 'express';
 import * as express from 'express';
 import { createServer, Server } from 'http';
 import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
+
+import { getStringDataFromFile, transformData } from '../data/generator';
 
 const app: Express = express();
 app.use('/', express.static(join(__dirname, 'client')));
@@ -21,11 +22,18 @@ server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - 
 
 let ml: ChildProcess;
 
-let inputData: any[];
+let inputData: string;
+let outputData: string;
 
 wsServer.on('connection', ws => {
 
     // ws.send('hello');
+    if (inputData !== undefined) {
+        ws.send(inputData);
+    }
+    if (outputData !== undefined) {
+        ws.send(outputData);
+    }
 
     if (ml !== undefined) {
         ml.on('message', message => {
@@ -39,6 +47,7 @@ wsServer.on('connection', ws => {
                 ml = fork('build/worker.js');
                 ml.send(message.substring(2));
                 ml.on('message', message => {
+                    outputData = message;
                     ws.send(message);
                 });
                 ml.on('exit', () => console.log('Process got killed'));
@@ -49,8 +58,8 @@ wsServer.on('connection', ws => {
             case 'DA':
                 const [ticker, date] = message.substring(2).split(':');
                 getStringDataFromFile().then(data => transformData(data)).then(data => {
-                    inputData = data;
-                    ws.send(JSON.stringify(data));
+                    inputData = JSON.stringify(data);
+                    ws.send(inputData);
                 });
                 break;
         }

@@ -61,9 +61,9 @@ export class App extends React.Component {
         this.ws.send('SP');
     }
 
-    getData() {
-        this.ws.send('DA' + this.ticker + ':' + this.date);
-    }
+    // getData() {
+    //     this.ws.send('DA' + this.ticker + ':' + this.date);
+    // }
 
     showNetwork(network: NetworkSerialized) {
         this.setState({ chosenNetwork: network });
@@ -104,9 +104,9 @@ export class App extends React.Component {
                 C2: <input defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
                 C3: <input defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
                 Species threshold: <input defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
-                <div>
+                {/* <div>
                     <button onClick={() => this.getData()}>GET DATA</button>
-                </div>
+                </div> */}
                 {this.state && this.state.mlState && <div>
                     <div>Current step: {this.state.mlState.step}</div>
                     <div>Species: {this.state.mlState.speciesArray.length} - {this.state.mlState.speciesArray.map((species, i) => <span key={i}> {species.networks.length} </span>)}</div>

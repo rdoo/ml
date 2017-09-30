@@ -6,6 +6,7 @@ import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
 
 import { getStringDataFromFile, transformData } from '../data/generator';
+import { XORArray } from '../data/xor';
 
 const app: Express = express();
 app.use('/', express.static(join(__dirname, 'client')));
@@ -24,6 +25,17 @@ let ml: ChildProcess;
 
 let inputData: string;
 let outputData: string;
+
+// getStringDataFromFile().then(data => transformData(data)).then(data => {
+//     inputData = JSON.stringify(data);
+// });
+
+const xorData: any[] = [];
+for (let i = 0; i < 100; i++) {
+    const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
+    xorData.push(XOR);
+}
+inputData = JSON.stringify(xorData);
 
 wsServer.on('connection', ws => {
 
@@ -45,7 +57,7 @@ wsServer.on('connection', ws => {
         switch (message.substring(0, 2)) {
             case 'ST':
                 ml = fork('build/worker.js');
-                ml.send(message.substring(2));
+                ml.send(JSON.stringify({ config: message.substring(2), inputData }));
                 ml.on('message', message => {
                     outputData = message;
                     ws.send(message);
@@ -55,13 +67,13 @@ wsServer.on('connection', ws => {
             case 'SP':
                 ml.kill();
                 break;
-            case 'DA':
-                const [ticker, date] = message.substring(2).split(':');
-                getStringDataFromFile().then(data => transformData(data)).then(data => {
-                    inputData = JSON.stringify(data);
-                    ws.send(inputData);
-                });
-                break;
+            // case 'DA':
+            //     const [ticker, date] = message.substring(2).split(':');
+            //     getStringDataFromFile().then(data => transformData(data)).then(data => {
+            //         inputData = JSON.stringify(data);
+            //         ws.send(inputData);
+            //     });
+            //     break;
         }
         
     });

@@ -18,7 +18,7 @@ export class App extends React.Component {
     config: Config = {
         networksNumber: 300,
         cullingPercent: 0.8,
-        fitnessThreshold: 1000,
+        fitnessThreshold: 100,
         weightMutation: 0.05,
         synapseMutation: 0.05,
         neuronMutation: 0.001,

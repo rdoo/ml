@@ -49,16 +49,20 @@ export class Runner {
         for (let species of this.speciesArray) {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
-                network.fitness = 500; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+                network.fitness = 1; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
                 let priceBought: number = 0;
                 for (const data of this.inputData) {
                     /*
                     network.inputs[0].value = data.i1;
                     network.inputs[1].value = data.i2;
                     const errorValue: number = Math.abs(network.evaluate() - data.o);
-                    network.fitness += errorValue;
-                    species.averageFitness += errorValue;
+                    if (errorValue < 0.1) {
+                        network.fitness++;
+                    } else {
+                        network.fitness--;
+                    }
                     */
+
                     network.inputs[0].value = data.price;
                     network.inputs[1].value = data.volume;
                     const evaluate: number = network.evaluate();
@@ -103,7 +107,7 @@ export class Runner {
             species.desiredPopulation = Math.floor((species.averageFitness / sumOfAverageFitnesses) * CONFIG.networksNumber);
         }
 
-        if (this.currentStep % 100 === 0) {
+        if (this.currentStep % 50 === 0) {
             // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
             this.printResults();
             console.log(this.currentStep);

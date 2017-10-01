@@ -4,7 +4,7 @@ input {
 
 .container {
     width: 100%;
-    height: 400px;
+    height: 300px;
     border: 1px solid black;
     overflow: hidden;
 }
@@ -32,6 +32,11 @@ input {
 
     margin: 2% auto;
     padding: 10px;
+}
+
+/* wyjatek dla svg znajdujacego sie w check compoenent */
+.check-container .container {
+    height: 300px;
 }
 
 .check-svg-container {

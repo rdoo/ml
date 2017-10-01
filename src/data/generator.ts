@@ -61,13 +61,15 @@ export function saveDataToFile(array: string[]) {
 
 export function transformData(array: string[]) {
     const data: any[] = [];
+    const firstItemPrice: number = Number(array[0].split(',')[5]);
 
     for (const item of array) {
         const splitItem: string[] = item.split(',');
+        const price: number = Number(splitItem[5]);
         const time: string = splitItem[2];
 
         if (time !== '090000' && time < '170000') {
-            data.push({ price: Number(splitItem[5]), volume: Number(splitItem[6]), time });
+            data.push({ value: (price - firstItemPrice) / firstItemPrice * 100 * 100, volume: Number(splitItem[6]), time });
         }
     }
 

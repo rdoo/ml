@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Config } from '../ml/config';
-import { NetworkSerialized, StateSerialized } from '../ml/serialization.models';
+import { NetworkSerialized, SpeciesSerialized, StateSerialized } from '../ml/serialization.models';
 import { CanvasComponent } from './canvas';
 import { CheckComponent } from './check';
 
@@ -20,10 +20,10 @@ export class App extends React.Component {
     config: Config = {
         networksNumber: 300,
         cullingPercent: 0.8,
-        fitnessThreshold: 100,
+        fitnessThreshold: 1000,
         weightMutation: 0.05,
         synapseMutation: 0.05,
-        neuronMutation: 0.001,
+        neuronMutation: 0.01,
         c1: 1.5,
         c2: 1.5,
         c3: 0.002,
@@ -119,15 +119,17 @@ export class App extends React.Component {
                 </div> */}
                 {this.state && this.state.mlState && <div>
                     <div>Current step: {this.state.mlState.step}</div>
-                    <div>Species: {this.state.mlState.speciesArray.length} - {this.state.mlState.speciesArray.map((species, i) => <span key={i}> {species.networks.length} </span>)}</div>
-                    <div>Best fitness: {this.state.mlState.bestNetwork.fitness}</div>
+                    <div>Species: {this.state.mlState.speciesArray.length} ({this.state.mlState.speciesArray.reduce((a, b) => a + b.networks.length, 0)})</div>
+                    {this.state.mlState.speciesArray.map((species, i) => <div key={i}>{i} - {species.networks.length} - {species.desiredPopulation} - {species.averageFitness} - {species.networks[0].fitness}</div>)}
                     <button onClick={() => this.showNetwork(this.state.mlState.bestNetwork)}>SHOW</button>
+                    <span>Best fitness: {this.state.mlState.bestNetwork.fitness}</span>
                     <CanvasComponent data={this.state.mlState.bestNetwork}></CanvasComponent>
                 </div>}
                 {this.state && this.state.mlState && this.state.mlState.speciesArray.map((species, i) => {
                     return <div key={i}>
                             <div>
-                                Number: <input value={String(this.state.currentlyViewed[i])} onChange={event => this.setCurrentlyViewed(i, Number((event.target as HTMLInputElement).value))}/>
+                                <span>#{i} - </span>
+                                <input value={String(this.state.currentlyViewed[i])} onChange={event => this.setCurrentlyViewed(i, Number((event.target as HTMLInputElement).value))}/>
                                 <button disabled={this.state.currentlyViewed[i] <= 0} onClick={() => this.setCurrentlyViewed(i, this.state.currentlyViewed[i] - 1)}>PREV</button>
                                 <button disabled={this.state.currentlyViewed[i] >= (species.networks.length - 1)} onClick={() => this.setCurrentlyViewed(i, this.state.currentlyViewed[i] + 1)}>NEXT</button>
                                 <button onClick={() => this.showNetwork(species.networks[this.state.currentlyViewed[i]])}>SHOW</button>
@@ -136,7 +138,7 @@ export class App extends React.Component {
                             <CanvasComponent data={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
-                { this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} data={this.state.inputData} onClick={() => this.hideNetwork()}></CheckComponent>}
+                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} data={this.state.inputData} onClick={() => this.hideNetwork()}></CheckComponent>}
             </div>
         );
     }

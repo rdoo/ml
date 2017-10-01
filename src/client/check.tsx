@@ -9,7 +9,8 @@ import { CanvasComponent } from './canvas';
 
 export class CheckComponent extends React.Component {
     props: { network: NetworkSerialized, data: any[], onClick: () => void };
-    state;
+
+    resultText: string = '';
 
     inputDataSVG: SVGElement;
     outputDataSVG: SVGElement;
@@ -24,15 +25,15 @@ export class CheckComponent extends React.Component {
     componentDidMount() {
         if (this.props.data !== undefined) {
             for (const item of this.props.data) {
-                if (item.price < this.min) {
-                    this.min = item.price;
-                } else if (item.price > this.max) {
-                    this.max = item.price;
+                if (item.value < this.min) {
+                    this.min = item.value;
+                } else if (item.value > this.max) {
+                    this.max = item.value;
                 }
             }
             this.restoreNetwork();
-            this.simulate()
             this.draw();
+            this.simulate();
         }
     }
 
@@ -103,11 +104,29 @@ export class CheckComponent extends React.Component {
 
     simulate() {
         const data: number[] = [];
+        let priceBought: number = undefined;
+        const svg = select(this.inputDataSVG);
+        let currentX: number = 0;
         for (const item of this.props.data) {
-            this.network.inputs[0].value = item.price;
+            this.network.inputs[0].value = item.value;
             this.network.inputs[1].value = item.volume;
 
-            data.push(this.network.evaluate());
+            const evaluate: number = this.network.evaluate();
+
+            data.push(evaluate);
+
+            if (evaluate > 0.90 && priceBought === undefined) {
+                priceBought = item.value;
+                this.resultText += 'B: ' + (item.value / 100).toFixed(2) + ' ';
+                svg.append('rect').attr('x', currentX - 3).attr('y', this.getYFromPrice(item.value) - 3).attr('width', 7).attr('height', 7).style('fill', 'green');
+            } else if (evaluate < 0.10 && priceBought !== undefined) {
+                const balance: number = item.value - priceBought - 20;
+                priceBought = undefined;
+                this.resultText += 'S: ' + (item.value / 100).toFixed(2) + ' ';
+                svg.append('rect').attr('x', currentX - 3).attr('y', this.getYFromPrice(item.value) - 3).attr('width', 7).attr('height', 7).style('fill', 'red');
+            }
+
+            currentX++;
         }
 
         this.miniDraw(data);
@@ -120,7 +139,7 @@ export class CheckComponent extends React.Component {
         let currentX: number = 0;
 
         for (const item of this.props.data) {
-            svg.append('rect').attr('x', currentX).attr('y', this.getYFromPrice(item.price)).attr('width', 1).attr('height', 1);
+            svg.append('rect').attr('x', currentX).attr('y', this.getYFromPrice(item.value)).attr('width', 1).attr('height', 1);
             currentX++;
         }
     }
@@ -136,11 +155,13 @@ export class CheckComponent extends React.Component {
             currentX++;
         }
 
-        svg.append('line').attr('x1', 0).attr('y1', 25).attr('x2', this.props.data.length).attr('y2', 25)
+        svg.append('line').attr('x1', 0).attr('y1', 10).attr('x2', this.props.data.length).attr('y2', 10)
             .style('stroke', 'green').style('stroke-width', 1);
 
-        svg.append('line').attr('x1', 0).attr('y1', 75).attr('x2', this.props.data.length).attr('y2', 75)
+        svg.append('line').attr('x1', 0).attr('y1', 90).attr('x2', this.props.data.length).attr('y2', 90)
             .style('stroke', 'red').style('stroke-width', 1);
+
+        this.forceUpdate(); // tylko po to zeby uruchomic change detection
     }
 
     getYFromPrice(price: number) {
@@ -155,6 +176,7 @@ export class CheckComponent extends React.Component {
                     <hr />
                     <svg ref={node => this.outputDataSVG = node} width={this.props.data.length} height={101}></svg>
                 </div>
+                <div>{this.resultText}</div>
                 <CanvasComponent data={this.props.network}></CanvasComponent>
             </div>
         </div>

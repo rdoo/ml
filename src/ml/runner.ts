@@ -50,7 +50,7 @@ export class Runner {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
                 network.fitness = 1; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
-                let priceBought: number = 0;
+                let priceBought: number = undefined;
                 for (const data of this.inputData) {
                     /*
                     network.inputs[0].value = data.i1;
@@ -63,22 +63,24 @@ export class Runner {
                     }
                     */
 
-                    network.inputs[0].value = data.price;
+                    network.inputs[0].value = data.value;
                     network.inputs[1].value = data.volume;
                     const evaluate: number = network.evaluate();
 
-                    if (evaluate > 0.75 && priceBought === 0) {
-                        priceBought = data.price;
-                    } else if (evaluate < 0.25 && priceBought !== 0) {
-                        const balance: number = ((data.price - priceBought) / priceBought) * 100; // dzwignia 100
+                    if (evaluate > 0.90 && priceBought === undefined) {
+                        priceBought = data.value;
+                    } else if (evaluate < 0.10 && priceBought !== undefined) {
+                        const balance: number = data.value - priceBought - 38;
                         network.fitness += balance;
-                        priceBought = 0;
+                        priceBought = undefined;
                     }
                 }
                 species.averageFitness += network.fitness;
             }
             species.averageFitness = species.averageFitness / species.networks.length;
-            sumOfAverageFitnesses += species.averageFitness;
+            if (species.averageFitness > 0) {
+                sumOfAverageFitnesses += species.averageFitness;
+            }
         }
 
         /*
@@ -105,6 +107,9 @@ export class Runner {
 
         for (let species of this.speciesArray) {
             species.desiredPopulation = Math.floor((species.averageFitness / sumOfAverageFitnesses) * CONFIG.networksNumber);
+            if (species.desiredPopulation < 0) {
+                species.desiredPopulation = 1;
+            }
         }
 
         if (this.currentStep % 50 === 0) {

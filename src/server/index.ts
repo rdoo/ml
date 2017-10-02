@@ -21,8 +21,6 @@ server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - 
 
 
 
-let ml: ChildProcess;
-
 let inputData: string;
 let outputData: string;
 
@@ -37,9 +35,20 @@ getStringDataFromFile().then(data => transformData(data)).then(data => {
 // }
 // inputData = JSON.stringify(xorData);
 
+let running: boolean = false;
+
+let ml: ChildProcess = fork('build/ml.js');
+
+ml.on('message', message => {
+    outputData = message;
+    console.log('Data received from worker');
+    wsServer.broadcast(message);
+});
+ml.on('exit', () => console.log('Process got killed'));
+
 wsServer.on('connection', ws => {
 
-    ws.send(JSON.stringify({ running: !!(ml && ml.connected) }));
+    ws.send(JSON.stringify({ running }));
     if (inputData !== undefined) {
         ws.send(inputData);
     }
@@ -47,27 +56,31 @@ wsServer.on('connection', ws => {
         ws.send(outputData);
     }
 
-    if (ml !== undefined) {
-        ml.on('message', message => {
-            ws.send(message);
-        });
-    }
-
     ws.on('message', message => {
         switch (message.substring(0, 2)) {
             case 'ST':
-                ml = fork('build/ml.js');
+                if (!IS_HEROKU && !ml.connected) {
+                    ml = fork('build/ml.js');
+
+                    ml.on('message', message => {
+                        outputData = message;
+                        console.log('Data received from worker');
+                        wsServer.broadcast(message);
+                    });
+                    ml.on('exit', () => console.log('Process got killed'));
+                }
+                // ml.send('CO' + JSON.stringify({ config: message.substring(2), inputData }));
                 ml.send(JSON.stringify({ config: message.substring(2), inputData }));
-                ml.on('message', message => {
-                    outputData = message;
-                    ws.send(message);
-                });
-                ml.on('exit', () => console.log('Process got killed'));
-                ws.send(JSON.stringify({ running: !!(ml && ml.connected) }));
+                running = true;
+                ws.send(JSON.stringify({ running }));
                 break;
             case 'SP':
+                if (IS_HEROKU) {
+                    process.exit(1);
+                }
                 ml.kill();
-                setTimeout(() => ws.send(JSON.stringify({ running: !!(ml && ml.connected) })), 100);
+                running = false;
+                setTimeout(() => ws.send(JSON.stringify({ running })), 100);
                 break;
             // case 'DA':
             //     const [ticker, date] = message.substring(2).split(':');

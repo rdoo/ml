@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const nodeModules = { };
 fs.readdirSync('node_modules').filter(x => x !== '.bin').forEach(x => nodeModules[x] = 'commonjs ' + x);
@@ -23,7 +24,8 @@ module.exports = [
             ]
         },
         plugins: [
-            new webpack.DefinePlugin({ IS_HEROKU: false })
+            new webpack.DefinePlugin({ IS_HEROKU: true }),
+            new UglifyJSPlugin()
         ]
     },
     {
@@ -44,7 +46,13 @@ module.exports = [
         plugins: [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'client', 'index.html') }
-            ])
+            ]),
+            new webpack.DefinePlugin({
+                'process.env': {
+                    NODE_ENV: JSON.stringify('production')
+                }
+            }),
+            new UglifyJSPlugin()
         ]
     },
     {
@@ -71,7 +79,8 @@ module.exports = [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'data', 'data.txt') }
             ]),
-            new webpack.DefinePlugin({ IS_HEROKU: false })
+            new webpack.DefinePlugin({ IS_HEROKU: true }),
+            new UglifyJSPlugin()
         ]
     }
 ];

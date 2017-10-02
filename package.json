@@ -5,7 +5,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "start": "concurrently \"webpack --watch --config webpack.config.dev.js\" \"nodemon build/server.js --watch build/server.js\"",
-    "build": "webpack --config webpack.config.prod.js"
+    "build": "webpack --config webpack.config.prod.js",
+    "heroku": "webpack --config webpack.config.heroku.js"
   },
   "dependencies": {
     "d3-selection": "^1.1.0",

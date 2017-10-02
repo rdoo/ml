@@ -24,6 +24,7 @@ module.exports = [
             ]
         },
         plugins: [
+            new webpack.DefinePlugin({ IS_HEROKU: false }),
             new UglifyJSPlugin()
         ]
     },
@@ -78,6 +79,7 @@ module.exports = [
             new CopyWebpackPlugin([
                 { from: path.join(__dirname, 'src', 'data', 'data.txt') }
             ]),
+            new webpack.DefinePlugin({ IS_HEROKU: false }),
             new UglifyJSPlugin()
         ]
     }

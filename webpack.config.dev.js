@@ -69,7 +69,7 @@ module.exports = [
         },
         plugins: [
             new CopyWebpackPlugin([
-                { from: path.join(__dirname, 'src', 'data', 'data.txt') }
+                { from: path.join(__dirname, 'src', 'data', 'PZU'), to: 'data' }
             ]),
             new webpack.DefinePlugin({ IS_HEROKU: false })
         ]

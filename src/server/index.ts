@@ -5,7 +5,14 @@ import { createServer, Server } from 'http';
 import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
 
-import { getStringDataFromFile, transformData } from '../data/generator';
+import {
+    chooseDataOfStock,
+    getAllDataFromMongoSince,
+    getStringDataFromFile,
+    readFilenamesInDirectory,
+    saveDataToFile,
+    transformData,
+} from '../data/generator';
 import { XORArray } from '../data/xor';
 
 const app: Express = express();
@@ -19,14 +26,35 @@ const port: string = process.env.PORT || '8080';
 
 server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - Server is listening on port ' + server.address().port));
 
-
-
-let inputData: string;
+let inputData: any[] = [];
+let inputDataNames: string[] = [];
 let outputData: string;
 
-getStringDataFromFile().then(data => transformData(data)).then(data => {
-    inputData = JSON.stringify(data);
+// readFilenamesInDirectory('src/data/dump').then(names => {
+//     const ticker: string = 'PZU';
+//     for (const name of names) {
+//         getStringDataFromFile('src/data/dump/' + name).then(data => {
+//             const stockData = chooseDataOfStock(data, ticker);
+//             saveDataToFile('src/data/' + ticker + '/' + name, stockData);
+//         });
+//     }
+// });
+
+readFilenamesInDirectory('build/data').then(names => {
+    for (const name of names) {
+        getStringDataFromFile('build/data/' + name).then(data => transformData(data)).then(data => {
+            if (data.length !== 0) {
+                const desc: string = 'PZU - ' + name;
+                inputData.push({ desc, data });
+                inputDataNames.push(desc);
+            }
+        });
+    }
 });
+
+// getStringDataFromFile().then(data => transformData(data)).then(data => {
+//     inputData = JSON.stringify(data);
+// });
 
 // const xorData: any[] = [];
 // for (let i = 0; i < 100; i++) {
@@ -49,8 +77,8 @@ ml.on('exit', () => console.log('Process got killed'));
 wsServer.on('connection', ws => {
 
     ws.send(JSON.stringify({ running }));
-    if (inputData !== undefined) {
-        ws.send(inputData);
+    if (inputDataNames.length !== 0) {
+        ws.send(JSON.stringify(inputDataNames));
     }
     if (outputData !== undefined) {
         ws.send(outputData);
@@ -82,13 +110,15 @@ wsServer.on('connection', ws => {
                 running = false;
                 setTimeout(() => ws.send(JSON.stringify({ running })), 100);
                 break;
-            // case 'DA':
-            //     const [ticker, date] = message.substring(2).split(':');
-            //     getStringDataFromFile().then(data => transformData(data)).then(data => {
-            //         inputData = JSON.stringify(data);
-            //         ws.send(inputData);
-            //     });
-            //     break;
+            case 'DA':
+                const name = message.substring(2);
+                for (const item of inputData) {
+                    if (item.desc === name) {
+                        ws.send(JSON.stringify(item));
+                        break;
+                    }
+                }
+                break;
         }
         
     });

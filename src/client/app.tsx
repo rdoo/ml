@@ -8,6 +8,7 @@ import { CheckComponent } from './check';
 interface AppState {
     mlState: StateSerialized;
     currentlyViewed: number[];
+    inputDataNames: string[];
     inputData: any[];
     chosenNetwork: NetworkSerialized;
     running: boolean;
@@ -53,7 +54,7 @@ export class App extends React.Component {
             } else if (newState.running !== undefined) {
                 this.setState(newState);
             } else if (newState.length > 0) {
-                this.setState({ inputData: newState });
+                this.setState({ inputDataNames: newState });
             }
         }
     }

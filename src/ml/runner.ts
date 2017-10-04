@@ -51,7 +51,7 @@ export class Runner {
         for (let species of this.speciesArray) {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
-                network.fitness = 500; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+                network.fitness += 500; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
                 let priceBought: number = undefined;
                 for (const data of inputData) {
                     /*
@@ -77,6 +77,7 @@ export class Runner {
                         priceBought = undefined;
                     }
                 }
+                network.fitness /= 2;
                 species.averageFitness += network.fitness;
             }
             species.averageFitness = species.averageFitness / species.networks.length;

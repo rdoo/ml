@@ -9,7 +9,7 @@ interface AppState {
     mlState: StateSerialized;
     currentlyViewed: number[];
     inputDataNames: string[];
-    inputData: any[];
+    inputData: { desc: string, data: any[] };
     chosenNetwork: NetworkSerialized;
     running: boolean;
     paused: boolean;
@@ -33,9 +33,6 @@ export class App extends React.Component {
 
     state: AppState | undefined;
 
-    ticker: string = 'PZU';
-    date: string = '2017-09-08';
-
     constructor(props) {
         super(props);
     }
@@ -53,6 +50,8 @@ export class App extends React.Component {
                 this.setState({ mlState: newState, currentlyViewed });
             } else if (newState.running !== undefined) {
                 this.setState(newState);
+            } else if (newState.desc !== undefined) {
+                this.setState({ inputData: newState });
             } else if (newState.length > 0) {
                 this.setState({ inputDataNames: newState });
             }
@@ -71,9 +70,9 @@ export class App extends React.Component {
         this.setState({ paused: !this.state.paused });
     }
 
-    // getData() {
-    //     this.ws.send('DA' + this.ticker + ':' + this.date);
-    // }
+    sendName(name: string) {
+        this.ws.send('DA' + name);
+    }
 
     showNetwork(network: NetworkSerialized) {
         this.setState({ chosenNetwork: network });
@@ -139,7 +138,7 @@ export class App extends React.Component {
                             <CanvasComponent data={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
-                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} data={this.state.inputData} onClick={() => this.hideNetwork()}></CheckComponent>}
+                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} dataNames={this.state.inputDataNames} data={this.state.inputData} onClick={() => this.hideNetwork()} onChange={name => this.sendName(name)}></CheckComponent>}
             </div>
         );
     }

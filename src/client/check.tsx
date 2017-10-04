@@ -7,33 +7,46 @@ import { NetworkSerialized } from '../ml/serialization.models';
 import { Synapse } from '../ml/synapse';
 import { CanvasComponent } from './canvas';
 
-export class CheckComponent extends React.Component {
-    props: { network: NetworkSerialized, data: any[], onClick: () => void };
+interface CheckState {
+    // data: { desc: string, data: any[] },
+    resultBalance: number
+}
 
-    resultText: string = '';
+export class CheckComponent extends React.Component {
+    props: { network: NetworkSerialized, dataNames: string[], data: { desc: string, data: any[] }, onClick: () => void, onChange: (name: string) => void };
+    state: CheckState = { resultBalance: 0 };
+
+    resultText: string;
+    resultBalance: number;
 
     inputDataSVG: SVGElement;
     outputDataSVG: SVGElement;
 
     network: Network;
 
-    min: number = 1e6;
-    max: number = 0;
+    min: number;
+    max: number;
 
     svgHeight: number = 200;
 
     componentDidMount() {
-        if (this.props.data !== undefined) {
-            for (const item of this.props.data) {
+        this.restoreNetwork();
+    }
+
+    componentWillReceiveProps(props) {
+        if (!this.state || this.props.data !== props.data) {
+
+            this.min = 1e6;
+            this.max = -1e6;
+            for (const item of props.data.data) {
                 if (item.value < this.min) {
                     this.min = item.value;
                 } else if (item.value > this.max) {
                     this.max = item.value;
                 }
             }
-            this.restoreNetwork();
-            this.draw();
-            this.simulate();
+            this.drawStockPlot(props.data.data);
+            this.simulate(props.data.data);
         }
     }
 
@@ -102,66 +115,67 @@ export class CheckComponent extends React.Component {
         throw('NEURON NOT FOUND');
     }
 
-    simulate() {
-        const data: number[] = [];
+    simulate(data: any[]) {
+        const evalData: number[] = [];
         let priceBought: number = undefined;
         const svg = select(this.inputDataSVG);
         let currentX: number = 0;
-        for (const item of this.props.data) {
+        this.resultText = '';
+        this.state.resultBalance = 0;
+        for (const item of data) {
             this.network.inputs[0].value = item.value;
             this.network.inputs[1].value = item.volume;
 
             const evaluate: number = this.network.evaluate();
 
-            data.push(evaluate);
+            evalData.push(evaluate);
 
             if (evaluate > 0.90 && priceBought === undefined) {
                 priceBought = item.value;
                 this.resultText += 'B: ' + (item.value / 100).toFixed(2) + ' ';
                 svg.append('rect').attr('x', currentX - 3).attr('y', this.getYFromPrice(item.value) - 3).attr('width', 7).attr('height', 7).style('fill', 'green');
             } else if (evaluate < 0.10 && priceBought !== undefined) {
-                const balance: number = item.value - priceBought - 20;
+                const balance: number = (item.value - priceBought - 38) / 100;
                 priceBought = undefined;
-                this.resultText += 'S: ' + (item.value / 100).toFixed(2) + ' ';
+                this.resultText += 'S: ' + (item.value / 100).toFixed(2) + ' (' + balance.toFixed(2) + ') ';
+                this.state.resultBalance += balance;
                 svg.append('rect').attr('x', currentX - 3).attr('y', this.getYFromPrice(item.value) - 3).attr('width', 7).attr('height', 7).style('fill', 'red');
             }
 
             currentX++;
         }
 
-        this.miniDraw(data);
+        this.miniDraw(evalData, data);
     }
 
-    draw() {
+    drawStockPlot(data: any[]) {
         select(this.inputDataSVG).selectAll('*').remove();
         const svg = select(this.inputDataSVG);
 
         let currentX: number = 0;
 
-        for (const item of this.props.data) {
+        for (const item of data) {
             svg.append('rect').attr('x', currentX).attr('y', this.getYFromPrice(item.value)).attr('width', 1).attr('height', 1);
             currentX++;
         }
     }
 
-    miniDraw(data: number[]) {
+    miniDraw(evalData: number[], data: any[]) {
         select(this.outputDataSVG).selectAll('*').remove();
         const svg = select(this.outputDataSVG);
 
         let currentX: number = 0;
         
-        for (const item of this.props.data) {
-            svg.append('rect').attr('x', currentX).attr('y', 100 - data[currentX] * 100).attr('width', 1).attr('height', 1);
+        for (const item of data) {
+            svg.append('rect').attr('x', currentX).attr('y', 100 - evalData[currentX] * 100).attr('width', 1).attr('height', 1);
             currentX++;
         }
 
-        svg.append('line').attr('x1', 0).attr('y1', 10).attr('x2', this.props.data.length).attr('y2', 10)
+        svg.append('line').attr('x1', 0).attr('y1', 10).attr('x2', data.length).attr('y2', 10)
             .style('stroke', 'green').style('stroke-width', 1);
 
-        svg.append('line').attr('x1', 0).attr('y1', 90).attr('x2', this.props.data.length).attr('y2', 90)
+        svg.append('line').attr('x1', 0).attr('y1', 90).attr('x2', data.length).attr('y2', 90)
             .style('stroke', 'red').style('stroke-width', 1);
-
-        this.forceUpdate(); // tylko po to zeby uruchomic change detection
     }
 
     getYFromPrice(price: number) {
@@ -171,10 +185,18 @@ export class CheckComponent extends React.Component {
     render() {
         return <div className="overlay" onClick={this.props.onClick}>
             <div className="check-container" onClick={event => event.stopPropagation()}>
+                <select onChange={event => this.props.onChange(event.target.value)}>
+                    {this.props.dataNames.map((item, i) => <option key={i}>{item}</option>)}
+                </select>
+                Current: {this.props.data && this.props.data.desc}
+                <span> </span>
+                Fitness: {this.props.network.fitness}
+                <span> </span>
+                Balance: {this.state && this.state.resultBalance.toFixed(2) + '%'}
                 <div className="check-svg-container">
-                    <svg ref={node => this.inputDataSVG = node} width={this.props.data.length} height={this.svgHeight}></svg>
+                    <svg ref={node => this.inputDataSVG = node} width={(this.props.data && this.props.data.data.length) || 1000} height={this.svgHeight}></svg>
                     <hr />
-                    <svg ref={node => this.outputDataSVG = node} width={this.props.data.length} height={101}></svg>
+                    <svg ref={node => this.outputDataSVG = node} width={(this.props.data && this.props.data.data.length) || 1000} height={101}></svg>
                 </div>
                 <div>{this.resultText}</div>
                 <CanvasComponent data={this.props.network}></CanvasComponent>

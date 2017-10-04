@@ -9,7 +9,7 @@ export class Runner {
     speciesArray: Species[] = [];
     bestNetwork: Network;
 
-    inputData: { [key: string]: number }[];
+    inputData: { desc: string, data: { [key: string]: number }[]}[];
 
     currentStep: number = 0;
 
@@ -44,14 +44,16 @@ export class Runner {
     }
 
     run() {
+        const inputData: any[] = this.inputData[Math.floor(Math.random() * this.inputData.length)].data;
+
         let sumOfAverageFitnesses: number = 0;
 
         for (let species of this.speciesArray) {
             species.averageFitness = 0; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
             for (let network of species.networks) {
-                network.fitness = 1; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
+                network.fitness = 500; // TODO sprawdzic czy to nie jest gdzies indziej zerowane
                 let priceBought: number = undefined;
-                for (const data of this.inputData) {
+                for (const data of inputData) {
                     /*
                     network.inputs[0].value = data.i1;
                     network.inputs[1].value = data.i2;

@@ -9,12 +9,13 @@ import { CanvasComponent } from './canvas';
 
 interface CheckState {
     // data: { desc: string, data: any[] },
-    resultBalance: number
+    resultBalance: number,
+    currentData: number;
 }
 
 export class CheckComponent extends React.Component {
     props: { network: NetworkSerialized, dataNames: string[], data: { desc: string, data: any[] }, onClick: () => void, onChange: (name: string) => void };
-    state: CheckState = { resultBalance: 0 };
+    state: CheckState = { resultBalance: 0, currentData: 0 };
 
     resultText: string;
     resultBalance: number;
@@ -31,10 +32,24 @@ export class CheckComponent extends React.Component {
 
     componentDidMount() {
         this.restoreNetwork();
+
+        if (this.props.data !== undefined) {
+            this.min = 1e6;
+            this.max = -1e6;
+            for (const item of this.props.data.data) {
+                if (item.value < this.min) {
+                    this.min = item.value;
+                } else if (item.value > this.max) {
+                    this.max = item.value;
+                }
+            }
+            this.drawStockPlot(this.props.data.data);
+            this.simulate(this.props.data.data);
+        }
     }
 
     componentWillReceiveProps(props) {
-        if (!this.state || this.props.data !== props.data) {
+        if (this.props.data !== props.data) {
 
             this.min = 1e6;
             this.max = -1e6;
@@ -182,12 +197,24 @@ export class CheckComponent extends React.Component {
         return (this.max - price) * (this.svgHeight - 1) / (this.max - this.min) + 0.5;
     }
 
+    changeCurrentData(desc: string) {
+        for (let i = 0; i < this.props.dataNames.length; i++) {
+            if (this.props.dataNames[i] === desc) {
+                this.setState({ currentData: i });
+                this.props.onChange(this.props.dataNames[i]);
+                break;
+            }
+        }
+    }
+
     render() {
         return <div className="overlay" onClick={this.props.onClick}>
             <div className="check-container" onClick={event => event.stopPropagation()}>
-                <select onChange={event => this.props.onChange(event.target.value)}>
+                <button disabled={this.state.currentData === 0} onClick={() => this.changeCurrentData(this.props.dataNames[this.state.currentData - 1])}>PREV</button>
+                <select value={this.props.dataNames[this.state.currentData]} onChange={event => this.changeCurrentData(event.target.value)}>
                     {this.props.dataNames.map((item, i) => <option key={i}>{item}</option>)}
                 </select>
+                <button disabled={this.state.currentData === (this.props.dataNames.length - 1)} onClick={() => this.changeCurrentData(this.props.dataNames[this.state.currentData + 1])}>NEXT</button>
                 Current: {this.props.data && this.props.data.desc}
                 <span> </span>
                 Fitness: {this.props.network.fitness}

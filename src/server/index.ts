@@ -52,10 +52,6 @@ readFilenamesInDirectory('build/data').then(names => {
     }
 });
 
-// getStringDataFromFile().then(data => transformData(data)).then(data => {
-//     inputData = JSON.stringify(data);
-// });
-
 // const xorData: any[] = [];
 // for (let i = 0; i < 100; i++) {
 //     const XOR = XORArray[Math.floor(Math.random() * XORArray.length)];
@@ -79,6 +75,12 @@ wsServer.on('connection', ws => {
     ws.send(JSON.stringify({ running }));
     if (inputDataNames.length !== 0) {
         ws.send(JSON.stringify(inputDataNames));
+        for (const item of inputData) {
+            if (item.desc === inputDataNames[0]) {
+                ws.send(JSON.stringify(item));
+                break;
+            }
+        }
     }
     if (outputData !== undefined) {
         ws.send(outputData);

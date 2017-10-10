@@ -10,6 +10,7 @@ interface AppState {
     currentlyViewed: number[];
     inputDataNames: string[];
     inputData: { desc: string, data: any[] };
+    inputData2: { [key: string]: any[] };
     chosenNetwork: NetworkSerialized;
     running: boolean;
     paused: boolean;
@@ -33,10 +34,6 @@ export class App extends React.Component {
 
     state: AppState | undefined;
 
-    constructor(props) {
-        super(props);
-    }
-
     componentDidMount() {
         this.setState({ paused: false });
         const protocol: string = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
@@ -51,8 +48,15 @@ export class App extends React.Component {
             } else if (newState.running !== undefined) {
                 this.setState(newState);
             } else if (newState.desc !== undefined) {
+                this.state.inputData2[newState.desc] = newState.data;
                 this.setState({ inputData: newState });
             } else if (newState.length > 0) {
+                const inputData: { [key: string]: any[] } = { };
+                for (const name of newState) {
+                    inputData[name] = null;
+                }
+                this.state.inputData2 = inputData;
+                console.log(this.state.inputData2);
                 this.setState({ inputDataNames: newState });
             }
         }
@@ -123,7 +127,7 @@ export class App extends React.Component {
                     {this.state.mlState.speciesArray.map((species, i) => <div key={i}>{i} - {species.networks.length} - {species.desiredPopulation} - {species.averageFitness} - {species.networks[0].fitness}</div>)}
                     <button onClick={() => this.showNetwork(this.state.mlState.bestNetwork)}>SHOW</button>
                     <span>Best fitness: {this.state.mlState.bestNetwork.fitness}</span>
-                    <CanvasComponent data={this.state.mlState.bestNetwork}></CanvasComponent>
+                    <CanvasComponent network={this.state.mlState.bestNetwork}></CanvasComponent>
                 </div>}
                 {this.state && this.state.mlState && this.state.mlState.speciesArray.map((species, i) => {
                     return <div key={i}>
@@ -135,10 +139,10 @@ export class App extends React.Component {
                                 <button onClick={() => this.showNetwork(species.networks[this.state.currentlyViewed[i]])}>SHOW</button>
                                 Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[this.state.currentlyViewed[i]].fitness}
                             </div>
-                            <CanvasComponent data={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
+                            <CanvasComponent network={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
-                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} dataNames={this.state.inputDataNames} data={this.state.inputData} onClick={() => this.hideNetwork()} onChange={name => this.sendName(name)}></CheckComponent>}
+                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} dataNames={this.state.inputDataNames} /*data={this.state.inputData}*/ inputData={this.state.inputData2} onClick={() => this.hideNetwork()} onChange={name => this.sendName(name)}></CheckComponent>}
             </div>
         );
     }

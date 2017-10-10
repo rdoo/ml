@@ -7,15 +7,29 @@ import { NetworkSerialized } from '../ml/serialization.models';
 import { Synapse } from '../ml/synapse';
 import { CanvasComponent } from './canvas';
 
+interface CheckProps {
+    network: NetworkSerialized;
+    inputData: { [key: string]: any[] };
+    onClick: () => void;
+    onChange: (name: string) => void;
+    // data: { data: any[], desc: string };
+    dataNames: string[]
+}
+
 interface CheckState {
     // data: { desc: string, data: any[] },
-    resultBalance: number,
-    currentData: number;
+    resultBalance: number;
+    currentDataName: string;
+    currentData: any[];
 }
 
 export class CheckComponent extends React.Component {
-    props: { network: NetworkSerialized, dataNames: string[], data: { desc: string, data: any[] }, onClick: () => void, onChange: (name: string) => void };
-    state: CheckState = { resultBalance: 0, currentData: 0 };
+    // props: { network: NetworkSerialized, dataNames: string[], data: { desc: string, data: any[] }, onClick: () => void, onChange: (name: string) => void };
+    props: CheckProps;
+    state: CheckState = { resultBalance: 0, currentDataName: '', currentData: null };
+
+    firstDataName: string;
+    lastDataName: string;
 
     resultText: string;
     resultBalance: number;
@@ -31,38 +45,84 @@ export class CheckComponent extends React.Component {
     svgHeight: number = 200;
 
     componentDidMount() {
+        console.log('mount');
+        console.log(this.props.inputData);
+        const nameArray: string[] = Object.keys(this.props.inputData);
+        this.firstDataName = nameArray[0];
+        this.lastDataName = nameArray[nameArray.length - 1];
+        this.setState({ currentDataName: this.firstDataName, currentData: this.props.inputData[this.firstDataName] });
         this.restoreNetwork();
 
-        if (this.props.data !== undefined) {
+        // if (this.state.currentData !== null) {
+        //     this.min = 1e6;
+        //     this.max = -1e6;
+        //     for (const item of this.state.currentData) {
+        //         if (item.value < this.min) {
+        //             this.min = item.value;
+        //         } else if (item.value > this.max) {
+        //             this.max = item.value;
+        //         }
+        //     }
+        //     this.drawStockPlot(this.state.currentData);
+        //     this.simulate(this.state.currentData);
+        // }
+    }
+
+    componentWillUpdate(nextProps: CheckProps, nextState: CheckState) {
+        console.log('update');
+        const data: any[] = this.props.inputData[nextState.currentDataName];
+
+        if (data && data.length > 0) {
+            console.log('drawuje', nextState.currentDataName);
             this.min = 1e6;
             this.max = -1e6;
-            for (const item of this.props.data.data) {
+            for (const item of data) {
                 if (item.value < this.min) {
                     this.min = item.value;
                 } else if (item.value > this.max) {
                     this.max = item.value;
                 }
             }
-            this.drawStockPlot(this.props.data.data);
-            this.simulate(this.props.data.data);
+            this.drawStockPlot(data);
+            this.simulate(data);
         }
     }
 
     componentWillReceiveProps(props) {
-        if (this.props.data !== props.data) {
+        console.log('props');
+        const newData: any[] = this.props.inputData[this.state.currentDataName];
+        if (newData !== this.state.currentData) {
+            this.setState({ currentData: newData });
 
-            this.min = 1e6;
-            this.max = -1e6;
-            for (const item of props.data.data) {
-                if (item.value < this.min) {
-                    this.min = item.value;
-                } else if (item.value > this.max) {
-                    this.max = item.value;
-                }
-            }
-            this.drawStockPlot(props.data.data);
-            this.simulate(props.data.data);
+            // if (newData && newData.length > 0) {
+            //     console.log('drawuje', this.state.currentDataName);
+            //     this.min = 1e6;
+            //     this.max = -1e6;
+            //     for (const item of newData) {
+            //         if (item.value < this.min) {
+            //             this.min = item.value;
+            //         } else if (item.value > this.max) {
+            //             this.max = item.value;
+            //         }
+            //     }
+            //     this.drawStockPlot(newData);
+            //     this.simulate(newData);
+            // }
         }
+        // if (this.props.data !== props.data) {
+
+        //     this.min = 1e6;
+        //     this.max = -1e6;
+        //     for (const item of props.data.data) {
+        //         if (item.value < this.min) {
+        //             this.min = item.value;
+        //         } else if (item.value > this.max) {
+        //             this.max = item.value;
+        //         }
+        //     }
+        //     this.drawStockPlot(props.data.data);
+        //     this.simulate(props.data.data);
+        // }
     }
 
     restoreNetwork() {
@@ -207,26 +267,56 @@ export class CheckComponent extends React.Component {
         }
     }
 
+    changeCurrentData2(desc: string) {
+        console.log('zmieniam des na', desc);
+        if (this.props.inputData[desc] === null) {
+            this.setState({ currentDataName: desc });
+            this.props.onChange(desc);
+        } else {
+            this.setState({ currentDataName: desc, currentData: this.props.inputData[desc] });
+        }
+    }
+
+    findPrev(name: string) {
+        const nameArray: string[] = Object.keys(this.props.inputData);
+
+        for (let i = nameArray.length - 1; i >= 0; i--) {
+            if (nameArray[i] === name) {
+                return nameArray[--i];
+            }
+        }
+    }
+
+    findNext(name: string) {
+        const nameArray: string[] = Object.keys(this.props.inputData);
+
+        for (let i = 0; i < nameArray.length; i++) {
+            if (nameArray[i] === name) {
+                return nameArray[++i];
+            }
+        }
+    }
+
     render() {
         return <div className="overlay" onClick={this.props.onClick}>
             <div className="check-container" onClick={event => event.stopPropagation()}>
-                <button disabled={this.state.currentData === 0} onClick={() => this.changeCurrentData(this.props.dataNames[this.state.currentData - 1])}>PREV</button>
-                <select value={this.props.dataNames[this.state.currentData]} onChange={event => this.changeCurrentData(event.target.value)}>
+                <button disabled={this.state.currentDataName === this.firstDataName} onClick={() => this.changeCurrentData2(this.findPrev(this.state.currentDataName))}>PREV</button>
+                <select value={this.state.currentDataName} onChange={event => this.changeCurrentData2(event.target.value)}>
                     {this.props.dataNames.map((item, i) => <option key={i}>{item}</option>)}
                 </select>
-                <button disabled={this.state.currentData === (this.props.dataNames.length - 1)} onClick={() => this.changeCurrentData(this.props.dataNames[this.state.currentData + 1])}>NEXT</button>
-                Current: {this.props.data && this.props.data.desc}
+                <button disabled={this.state.currentDataName === this.lastDataName} onClick={() => this.changeCurrentData2(this.findNext(this.state.currentDataName))}>NEXT</button>
+                Current: {this.state.currentDataName}
                 <span> </span>
                 Fitness: {this.props.network.fitness}
                 <span> </span>
                 Balance: {this.state && this.state.resultBalance.toFixed(2) + '%'}
                 <div className="check-svg-container">
-                    <svg ref={node => this.inputDataSVG = node} width={(this.props.data && this.props.data.data.length) || 1000} height={this.svgHeight}></svg>
+                    <svg ref={node => this.inputDataSVG = node} width={(this.state.currentData && this.state.currentData.length) || 1000} height={this.svgHeight}></svg>
                     <hr />
-                    <svg ref={node => this.outputDataSVG = node} width={(this.props.data && this.props.data.data.length) || 1000} height={101}></svg>
+                    <svg ref={node => this.outputDataSVG = node} width={(this.state.currentData && this.state.currentData.length) || 1000} height={101}></svg>
                 </div>
                 <div>{this.resultText}</div>
-                <CanvasComponent data={this.props.network}></CanvasComponent>
+                <CanvasComponent network={this.props.network}></CanvasComponent>
             </div>
         </div>
     };

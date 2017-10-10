@@ -12,17 +12,11 @@ const EVEN_Y_OFFSET: number = 25;
 
 export class CanvasComponent extends React.Component {
     node: SVGElement;
-    props: { data: NetworkSerialized };
+    props: { network: NetworkSerialized };
     state = { clicked: false };
 
-
-    constructor(props) {
-        super(props);
-        this.draw = this.draw.bind(this);
-    }
-
     componentDidMount() {
-        if (this.props.data.inputs !== undefined) {
+        if (this.props.network.inputs !== undefined) {
             this.draw();
         }
     }
@@ -43,7 +37,7 @@ export class CanvasComponent extends React.Component {
         const calculatedNeurons: {[id: number]: { x: number, y: number, layer: number }} = { };
         let calculatedNeuronsNumber: number = 0;
 
-        for (const neuron of this.props.data.inputs) {
+        for (const neuron of this.props.network.inputs) {
             const x: number = layerNumber * X_MULTIPLIER + X_OFFSET;
             const y: number = currentNodeInLayer * Y_MULTIPLIER + Y_OFFSET;
 
@@ -61,17 +55,17 @@ export class CanvasComponent extends React.Component {
         layerNumber++;
         currentNodeInLayer = 0;
 
-        const allNeuronsNumber: number = this.props.data.inputs.length + this.props.data.hidden.length; // without output
+        const allNeuronsNumber: number = this.props.network.inputs.length + this.props.network.hidden.length; // without output
     
         while (calculatedNeuronsNumber < allNeuronsNumber) {
             let lowestDiscNeuron: NeuronSerialized;
             let lowestDisc: number = 1e10;
             let thereAreZeros: boolean = false;
 
-            for (const neuron of this.props.data.hidden) {
+            for (const neuron of this.props.network.hidden) {
                 if (calculatedNeurons[neuron.id] === undefined) {
                     let currentDisc: number = 0;
-                    for (const synapse of this.props.data.synapses) {
+                    for (const synapse of this.props.network.synapses) {
                         if (synapse.targetId === neuron.id && calculatedNeurons[synapse.originId] === undefined) {
                             currentDisc++;
                         }
@@ -129,17 +123,17 @@ export class CanvasComponent extends React.Component {
         if (layerNumber % 2 === 1) {
             y += EVEN_Y_OFFSET;
         }
-        calculatedNeurons[this.props.data.output.id] = { x, y, layer: layerNumber };
+        calculatedNeurons[this.props.network.output.id] = { x, y, layer: layerNumber };
 
         svg.append('circle').attr('r', 10).style('fill', 'white').style('stroke', 'black')
             .attr('transform', 'translate(' + x + ', ' + y + ')');
 
         svg.append('text').attr('x', x).attr('y', y + 7).attr('font-size', 8).attr('fill', 'black')
-            .text(this.props.data.output.id);
+            .text(this.props.network.output.id);
 
 
         // synapses
-        for (const synapse of this.props.data.synapses) {
+        for (const synapse of this.props.network.synapses) {
             const originX: number = calculatedNeurons[synapse.originId].x;
             let originY: number = calculatedNeurons[synapse.originId].y;
             const targetX: number = calculatedNeurons[synapse.targetId].x;

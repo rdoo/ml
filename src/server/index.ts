@@ -68,7 +68,15 @@ ml.on('message', message => {
     console.log('Data received from worker');
     wsServer.broadcast(message);
 });
-ml.on('exit', () => console.log('Process got killed'));
+
+ml.on('exit', () => {
+    console.log('Process got killed');
+    if (IS_HEROKU) {
+        process.exit(1);
+    } else {
+        wsServer.broadcast(JSON.stringify({ running }));
+    }
+});
 
 wsServer.on('connection', ws => {
 

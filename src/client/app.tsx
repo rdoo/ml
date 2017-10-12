@@ -5,12 +5,14 @@ import { NetworkSerialized, SpeciesSerialized, StateSerialized } from '../ml/ser
 import { CanvasComponent } from './canvas';
 import { CheckComponent } from './check';
 
+interface InputData {
+    [key: string]: any[];
+}
+
 interface AppState {
     mlState: StateSerialized;
     currentlyViewed: number[];
-    inputDataNames: string[];
-    inputData: { desc: string, data: any[] };
-    inputData2: { [key: string]: any[] };
+    inputData: InputData;
     chosenNetwork: NetworkSerialized;
     running: boolean;
     paused: boolean;
@@ -48,16 +50,14 @@ export class App extends React.Component {
             } else if (newState.running !== undefined) {
                 this.setState(newState);
             } else if (newState.desc !== undefined) {
-                this.state.inputData2[newState.desc] = newState.data;
-                this.setState({ inputData: newState });
+                this.state.inputData[newState.desc] = newState.data;
+                this.setState({ inputData: this.state.inputData });
             } else if (newState.length > 0) {
                 const inputData: { [key: string]: any[] } = { };
                 for (const name of newState) {
                     inputData[name] = null;
                 }
-                this.state.inputData2 = inputData;
-                console.log(this.state.inputData2);
-                this.setState({ inputDataNames: newState });
+                this.setState({ inputData });
             }
         }
     }
@@ -74,15 +74,15 @@ export class App extends React.Component {
         this.setState({ paused: !this.state.paused });
     }
 
-    sendName(name: string) {
-        this.ws.send('DA' + name);
+    sendRequestForData(dataName: string) {
+        this.ws.send('DA' + dataName);
     }
 
     showNetwork(network: NetworkSerialized) {
         this.setState({ chosenNetwork: network });
     }
 
-    hideNetwork() {
+    hideCheckComponent() {
         this.setState({ chosenNetwork: undefined });
     }
 
@@ -118,9 +118,6 @@ export class App extends React.Component {
                 C2: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
                 C3: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
                 Species threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
-                {/* <div>
-                    <button onClick={() => this.getData()}>GET DATA</button>
-                </div> */}
                 {this.state && this.state.mlState && <div>
                     <div>Current step: {this.state.mlState.step}</div>
                     <div>Species: {this.state.mlState.speciesArray.length} ({this.state.mlState.speciesArray.reduce((a, b) => a + b.networks.length, 0)})</div>
@@ -142,7 +139,7 @@ export class App extends React.Component {
                             <CanvasComponent network={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
-                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} dataNames={this.state.inputDataNames} /*data={this.state.inputData}*/ inputData={this.state.inputData2} onClick={() => this.hideNetwork()} onChange={name => this.sendName(name)}></CheckComponent>}
+                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} inputData={this.state.inputData} onHideCheckComponent={() => this.hideCheckComponent()} onSendRequestForData={name => this.sendRequestForData(name)}></CheckComponent>}
             </div>
         );
     }

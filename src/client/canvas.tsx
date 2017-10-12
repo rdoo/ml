@@ -16,9 +16,7 @@ export class CanvasComponent extends React.Component {
     state = { clicked: false };
 
     componentDidMount() {
-        if (this.props.network.inputs !== undefined) {
-            this.draw();
-        }
+        this.draw();
     }
 
     componentDidUpdate() {

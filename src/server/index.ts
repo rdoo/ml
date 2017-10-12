@@ -26,8 +26,8 @@ const port: string = process.env.PORT || '8080';
 
 server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - Server is listening on port ' + server.address().port));
 
-let inputData: any[] = [];
-let inputDataNames: string[] = [];
+const inputData: any[] = [];
+const inputDataNames: string[] = [];
 let outputData: string;
 
 // readFilenamesInDirectory('src/data/dump').then(names => {
@@ -44,7 +44,7 @@ readFilenamesInDirectory('build/data').then(names => {
     for (const name of names) {
         getStringDataFromFile('build/data/' + name).then(data => transformData(data)).then(data => {
             if (data.length !== 0) {
-                const desc: string = 'PZU - ' + name;
+                const desc: string = 'PZU - ' + name.substring(0, name.length - 4); // strip extension
                 inputData.push({ desc, data });
                 inputDataNames.push(desc);
             }
@@ -79,16 +79,9 @@ ml.on('exit', () => {
 });
 
 wsServer.on('connection', ws => {
-
     ws.send(JSON.stringify({ running }));
     if (inputDataNames.length !== 0) {
         ws.send(JSON.stringify(inputDataNames));
-        for (const item of inputData) {
-            if (item.desc === inputDataNames[0]) {
-                ws.send(JSON.stringify(item));
-                break;
-            }
-        }
     }
     if (outputData !== undefined) {
         ws.send(outputData);

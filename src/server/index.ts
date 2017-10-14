@@ -101,7 +101,7 @@ wsServer.on('connection', ws => {
                     ml.on('exit', () => console.log('Process got killed'));
                 }
                 // ml.send('CO' + JSON.stringify({ config: message.substring(2), inputData }));
-                ml.send(JSON.stringify({ config: message.substring(2), inputData }));
+                ml.send(JSON.stringify({ configData: JSON.parse(message.substring(2)), inputData }));
                 running = true;
                 ws.send(JSON.stringify({ running }));
                 break;

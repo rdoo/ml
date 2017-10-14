@@ -32,7 +32,7 @@ process.on('message', message => {
     // }
 
     const parsedMessage: any = JSON.parse(message);
-    CONFIG = JSON.parse(parsedMessage.config);
+    CONFIG = parsedMessage.configData.config;
     const inputData: any[] = parsedMessage.inputData;
     console.log(CONFIG);
     GLOBALS = new Globals();

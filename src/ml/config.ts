@@ -10,3 +10,9 @@ export interface Config {
     c3: number;
     sameSpeciesThreshold: number;
 }
+
+export interface Options {
+    startMode: string;
+    fileName: string;
+    inputValue: string;
+}

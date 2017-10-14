@@ -249,7 +249,7 @@ export class CheckComponent extends React.Component {
 
     render() {
         return <div className="overlay" onClick={this.props.onHideCheckComponent}>
-            <div className="check-container" onClick={event => event.stopPropagation()}>
+            <div className="floating-container" onClick={event => event.stopPropagation()}>
                 <span>Fitness: {this.props.network.fitness}</span>
                 <button disabled={this.state.currentDataName === this.firstDataName} onClick={() => this.changeCurrentData(this.findPrevDataName(this.state.currentDataName))}>PREV</button>
                 <select value={this.state.currentDataName} onChange={event => this.changeCurrentData(event.target.value)}>

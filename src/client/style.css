@@ -23,7 +23,7 @@ input {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-.check-container {
+.floating-container {
     height: 90%;
     width: 90%;
 
@@ -32,11 +32,6 @@ input {
 
     margin: 2% auto;
     padding: 10px;
-}
-
-/* wyjatek dla svg znajdujacego sie w check compoenent */
-.check-container .container {
-    height: 300px;
 }
 
 .check-svg-container {

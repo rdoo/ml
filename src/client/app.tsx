@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Config } from '../ml/config';
+import { Config, Options } from '../ml/config';
 import { NetworkSerialized, StateSerialized } from '../ml/serialization.models';
 import { CanvasComponent } from './canvas';
 import { CheckComponent } from './check';
@@ -11,12 +11,13 @@ interface InputData {
 }
 
 interface AppState {
-    mlState: StateSerialized;
-    currentlyViewed: number[];
-    inputData: InputData;
-    chosenNetwork: NetworkSerialized;
+    mlState?: StateSerialized;
+    currentlyViewed?: number[];
+    inputData?: InputData;
+    chosenNetwork?: NetworkSerialized;
     running: boolean;
     paused: boolean;
+    optionsOpened: boolean;
 }
 
 export class App extends React.Component {
@@ -35,10 +36,15 @@ export class App extends React.Component {
         sameSpeciesThreshold: 1.0
     };
 
-    state: AppState | undefined;
+    options: Options = {
+        startMode: 'fresh',
+        fileName: '',
+        inputValue: ''
+    };
+
+    state: AppState = { running: false, paused: false, optionsOpened: false };
 
     componentDidMount() {
-        this.setState({ paused: false });
         const protocol: string = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
         
         this.ws = new WebSocket(protocol + window.location.host);
@@ -64,19 +70,19 @@ export class App extends React.Component {
     }
 
     start() {
-        this.ws.send('ST' + JSON.stringify(this.config));
+        this.ws.send('ST' + JSON.stringify({ options: this.options, config: this.config }));
     }
 
     stop() {
         this.ws.send('SP');
     }
 
-    pause() {
-        this.setState({ paused: !this.state.paused });
-    }
-
     sendRequestForData(dataName: string) {
         this.ws.send('DA' + dataName);
+    }
+
+    pause() {
+        this.setState({ paused: !this.state.paused });
     }
 
     openCheckComponent(network: NetworkSerialized) {
@@ -106,22 +112,12 @@ export class App extends React.Component {
     render() {
         return (
             <div>
-                <button disabled={this.state && this.state.running} onClick={() => this.start()}>START</button>
-                <button disabled={this.state && !this.state.running} onClick={() => this.pause()}>{this.state && this.state.paused ? 'UNPAUSE' : 'PAUSE'}</button>
-                <button disabled={this.state && !this.state.running} onClick={() => this.stop()}>STOP</button>
-                <button>OPTS</button>
-                Networks #: <input disabled={this.state && this.state.running} defaultValue={String(this.config.networksNumber)} onKeyUp={event => this.config.networksNumber = Number((event.target as HTMLInputElement).value)} />
-                Culling %: <input disabled={this.state && this.state.running} defaultValue={String(this.config.cullingPercent)} onKeyUp={event => this.config.cullingPercent = Number((event.target as HTMLInputElement).value)} />
-                Fitness threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.fitnessThreshold)} onKeyUp={event => this.config.fitnessThreshold = Number((event.target as HTMLInputElement).value)} />
-                Weight mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.weightMutation)} onKeyUp={event => this.config.weightMutation = Number((event.target as HTMLInputElement).value)} />
-                Synapse mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.synapseMutation)} onKeyUp={event => this.config.synapseMutation = Number((event.target as HTMLInputElement).value)} />
-                Neuron mut: <input disabled={this.state && this.state.running} defaultValue={String(this.config.neuronMutation)} onKeyUp={event => this.config.neuronMutation = Number((event.target as HTMLInputElement).value)} />
-                C1: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c1)} onKeyUp={event => this.config.c1 = Number((event.target as HTMLInputElement).value)} />
-                C2: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c2)} onKeyUp={event => this.config.c2 = Number((event.target as HTMLInputElement).value)} />
-                C3: <input disabled={this.state && this.state.running} defaultValue={String(this.config.c3)} onKeyUp={event => this.config.c3 = Number((event.target as HTMLInputElement).value)} />
-                Species threshold: <input disabled={this.state && this.state.running} defaultValue={String(this.config.sameSpeciesThreshold)} onKeyUp={event => this.config.sameSpeciesThreshold = Number((event.target as HTMLInputElement).value)} />
-                <OptionsComponent></OptionsComponent>
-                {this.state && this.state.mlState && <div>
+                {this.state.optionsOpened && <OptionsComponent running={this.state.running} config={this.config} options={this.options} onStart={() => this.start()} onStop={() => this.stop()} onHideOptionsComponent={() => this.setState({ optionsOpened: false })}></OptionsComponent>}
+                <button disabled={this.state.running} onClick={() => this.start()}>START</button>
+                <button disabled={!this.state.running} onClick={() => this.pause()}>{this.state.paused ? 'UNPAUSE' : 'PAUSE'}</button>
+                <button disabled={!this.state.running} onClick={() => this.stop()}>STOP</button>
+                <button onClick={() => this.setState({ optionsOpened: true })}>OPTIONS</button>
+                {this.state.mlState && <div>
                     <div>Current step: {this.state.mlState.step}</div>
                     <div>Species: {this.state.mlState.speciesArray.length} ({this.state.mlState.speciesArray.reduce((a, b) => a + b.networks.length, 0)})</div>
                     {this.state.mlState.speciesArray.map((species, i) => <div key={i}>{i} - {species.networks.length} - {species.desiredPopulation} - {species.averageFitness} - {species.networks[0].fitness}</div>)}
@@ -129,7 +125,7 @@ export class App extends React.Component {
                     <span>Best fitness: {this.state.mlState.bestNetwork.fitness}</span>
                     <CanvasComponent network={this.state.mlState.bestNetwork}></CanvasComponent>
                 </div>}
-                {this.state && this.state.mlState && this.state.mlState.speciesArray.map((species, i) => {
+                {this.state.mlState && this.state.mlState.speciesArray.map((species, i) => {
                     return <div key={i}>
                             <div>
                                 <span>#{i} - </span>
@@ -142,7 +138,7 @@ export class App extends React.Component {
                             <CanvasComponent network={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>
                         </div>;
                 })}
-                {this.state && this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} inputData={this.state.inputData} onHideCheckComponent={() => this.hideCheckComponent()} onSendRequestForData={name => this.sendRequestForData(name)}></CheckComponent>}
+                {this.state.chosenNetwork && <CheckComponent network={this.state.chosenNetwork} inputData={this.state.inputData} onHideCheckComponent={() => this.hideCheckComponent()} onSendRequestForData={name => this.sendRequestForData(name)}></CheckComponent>}
             </div>
         );
     }

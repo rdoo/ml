@@ -1,3 +1,4 @@
+import { Config } from './config';
 import { Globals } from './globals';
 
 export interface NeuronSerialized {
@@ -33,4 +34,5 @@ export interface StateSerialized {
     bestNetwork: NetworkSerialized;
     speciesArray: SpeciesSerialized[];
     globals: Globals
+    config: Config
 }

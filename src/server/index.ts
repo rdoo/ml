@@ -66,7 +66,7 @@ let ml: ChildProcess = fork('build/ml.js');
 ml.on('message', message => {
     outputData = message;
     console.log('Data received from worker');
-    wsServer.broadcast(message);
+    wsServer.broadcast('ST' + message);
 });
 
 ml.on('exit', () => {
@@ -74,17 +74,17 @@ ml.on('exit', () => {
     if (IS_HEROKU) {
         process.exit(1);
     } else {
-        wsServer.broadcast(JSON.stringify({ running }));
+        wsServer.broadcast('RU' + JSON.stringify({ running }));
     }
 });
 
 wsServer.on('connection', ws => {
-    ws.send(JSON.stringify({ running }));
+    ws.send('RU' + JSON.stringify({ running }));
     if (inputDataNames.length !== 0) {
-        ws.send(JSON.stringify(inputDataNames));
+        ws.send('NA' + JSON.stringify(inputDataNames));
     }
     if (outputData !== undefined) {
-        ws.send(outputData);
+        ws.send('ST' + outputData);
     }
 
     ws.on('message', message => {
@@ -96,14 +96,14 @@ wsServer.on('connection', ws => {
                     ml.on('message', message => {
                         outputData = message;
                         console.log('Data received from worker');
-                        wsServer.broadcast(message);
+                        wsServer.broadcast('ST' + message);
                     });
                     ml.on('exit', () => console.log('Process got killed'));
                 }
                 // ml.send('CO' + JSON.stringify({ config: message.substring(2), inputData }));
                 ml.send(JSON.stringify({ configData: JSON.parse(message.substring(2)), inputData }));
                 running = true;
-                ws.send(JSON.stringify({ running }));
+                ws.send('RU' + JSON.stringify({ running }));
                 break;
             case 'SP':
                 if (IS_HEROKU) {
@@ -111,13 +111,13 @@ wsServer.on('connection', ws => {
                 }
                 ml.kill();
                 running = false;
-                setTimeout(() => ws.send(JSON.stringify({ running })), 100);
+                setTimeout(() => ws.send('RU' + JSON.stringify({ running })), 100);
                 break;
             case 'DA':
                 const name = message.substring(2);
                 for (const item of inputData) {
                     if (item.desc === name) {
-                        ws.send(JSON.stringify(item));
+                        ws.send('IN' + JSON.stringify(item));
                         break;
                     }
                 }

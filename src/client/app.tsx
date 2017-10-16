@@ -50,21 +50,32 @@ export class App extends React.Component {
         this.ws = new WebSocket(protocol + window.location.host);
         
         this.ws.onmessage = (message) => {
-            const newState: any = JSON.parse(message.data);
-            if (newState.step !== undefined && !this.state.paused) {
-                const currentlyViewed: number[] = newState.speciesArray.map(species => 0);
-                this.setState({ mlState: newState, currentlyViewed });
-            } else if (newState.running !== undefined) {
-                this.setState(newState);
-            } else if (newState.desc !== undefined) {
-                this.state.inputData[newState.desc] = newState.data;
-                this.setState({ inputData: this.state.inputData });
-            } else if (newState.length > 0) {
-                const inputData: { [key: string]: any[] } = { };
-                for (const name of newState) {
-                    inputData[name] = null;
-                }
-                this.setState({ inputData });
+            const type: string = message.data.substring(0, 2);
+            const receivedData: any = JSON.parse(message.data.substring(2));
+            switch (type) {
+                case 'ST': // ml state
+                    if (!this.state.paused) {
+                        const currentlyViewed: number[] = receivedData.speciesArray.map(species => 0);
+                        this.config = receivedData.config;
+                        this.setState({ mlState: receivedData, currentlyViewed });
+                    }
+                    break;
+                case 'RU': // is running
+                    this.setState(receivedData);
+                    break;
+                case 'NA': // input data names
+                    const inputData: { [key: string]: any[] } = { };
+                    for (const name of receivedData) {
+                        inputData[name] = null;
+                    }
+                    this.setState({ inputData });
+                    break;
+                case 'IN': // input data
+                    this.state.inputData[receivedData.desc] = receivedData.data;
+                    this.setState({ inputData: this.state.inputData });
+                    break;
+                default:
+                    throw 'Unknown type of received data';
             }
         }
     }

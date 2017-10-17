@@ -1,3 +1,4 @@
+import { createWriteStream, readFile } from 'fs';
 import { ChildProcess, fork } from 'child_process';
 import { Express } from 'express';
 import * as express from 'express';
@@ -5,15 +6,7 @@ import { createServer, Server } from 'http';
 import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
 
-import {
-    chooseDataOfStock,
-    getAllDataFromMongoSince,
-    getStringDataFromFile,
-    readFilenamesInDirectory,
-    saveDataToFile,
-    transformData,
-} from '../data/generator';
-import { XORArray } from '../data/xor';
+import { getStringDataFromFile, readFilenamesInDirectory, transformData } from '../data/generator';
 
 const app: Express = express();
 app.use('/', express.static(join(__dirname, 'client')));
@@ -29,6 +22,7 @@ server.listen(port, () => console.log(new Date().toString().split(' ')[4] + ' - 
 const inputData: any[] = [];
 const inputDataNames: string[] = [];
 let outputData: string;
+let fileName: string;
 
 // readFilenamesInDirectory('src/data/dump').then(names => {
 //     const ticker: string = 'PZU';
@@ -63,11 +57,7 @@ let running: boolean = false;
 
 let ml: ChildProcess = fork('build/ml.js');
 
-ml.on('message', message => {
-    outputData = message;
-    console.log('Data received from worker');
-    wsServer.broadcast('ST' + message);
-});
+ml.on('message', handleMLData);
 
 ml.on('exit', () => {
     console.log('Process got killed');
@@ -93,17 +83,32 @@ wsServer.on('connection', ws => {
                 if (!IS_HEROKU && !ml.connected) {
                     ml = fork('build/ml.js');
 
-                    ml.on('message', message => {
-                        outputData = message;
-                        console.log('Data received from worker');
-                        wsServer.broadcast('ST' + message);
-                    });
+                    ml.on('message', handleMLData);
                     ml.on('exit', () => console.log('Process got killed'));
                 }
-                // ml.send('CO' + JSON.stringify({ config: message.substring(2), inputData }));
-                ml.send(JSON.stringify({ configData: JSON.parse(message.substring(2)), inputData }));
-                running = true;
-                ws.send('RU' + JSON.stringify({ running }));
+                const parsedMessage: any = JSON.parse(message.substring(2));
+                fileName = parsedMessage.options.fileName;
+                if (parsedMessage.options.startMode === 'fresh') {
+                    parsedMessage.options.inputValue = '';
+                    ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                    running = true;
+                    ws.send('RU' + JSON.stringify({ running }));
+                } else if (parsedMessage.options.startMode === 'file') {
+                    readFile('build/' + fileName, 'utf8', (err, data) => {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            parsedMessage.options.inputValue = data;
+                            ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                            running = true;
+                            ws.send('RU' + JSON.stringify({ running }));
+                        }
+                    });
+                } else {
+                    ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                    running = true;
+                    ws.send('RU' + JSON.stringify({ running }));
+                }
                 break;
             case 'SP':
                 if (IS_HEROKU) {
@@ -126,3 +131,14 @@ wsServer.on('connection', ws => {
         
     });
 });
+
+function handleMLData(data: string) {
+    outputData = data;
+    console.log('Data received from worker');
+    wsServer.broadcast('ST' + data);
+
+    if (fileName) {
+        const writer = createWriteStream('build/' + fileName);
+        writer.write(data);
+    }
+}

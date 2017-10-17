@@ -38,7 +38,7 @@ export class App extends React.Component {
 
     options: Options = {
         startMode: 'fresh',
-        fileName: '',
+        fileName: 'data.txt',
         inputValue: ''
     };
 

@@ -1,3 +1,4 @@
+import { StateSerialized } from './serialization.models';
 import { Config } from './config';
 import { Globals } from './globals';
 import { Runner } from './runner';
@@ -13,32 +14,23 @@ function delayedRunForHeroku() {
 }
 
 process.on('message', message => {
-    // const type: string = message.substring(0, 2);
-
-    // switch (type) {
-    //     case 'CO':
-    //         const parsedMessage: any = JSON.parse(message.substring(2));
-    //         CONFIG = JSON.parse(parsedMessage.config);
-    //         const inputData: any[] = JSON.parse(parsedMessage.inputData);
-    //         console.log(CONFIG);
-    //         GLOBALS = new Globals();
-        
-    //         runner = new Runner();
-    //         runner.inputData = inputData;
-    //         break;
-    //     case 'RU': {
-    //         runner.run();
-    //     }
-    // }
-
     const parsedMessage: any = JSON.parse(message);
-    CONFIG = parsedMessage.configData.config;
-    const inputData: any[] = parsedMessage.inputData;
-    console.log(CONFIG);
-    GLOBALS = new Globals();
 
     runner = new Runner();
-    runner.inputData = inputData;
+    runner.inputData = parsedMessage.inputData;;
+
+    if (parsedMessage.configData.options.inputValue) {
+        const stateSerialized: StateSerialized = JSON.parse(parsedMessage.configData.options.inputValue);
+        CONFIG = stateSerialized.config;
+        GLOBALS = stateSerialized.globals;
+        runner.init(stateSerialized);
+    } else {
+        CONFIG = parsedMessage.configData.config;
+        GLOBALS = new Globals();
+        runner.initBasic();
+    }
+
+    console.log(CONFIG);
 
     if (IS_HEROKU) {
         delayedRunForHeroku();

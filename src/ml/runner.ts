@@ -1,6 +1,6 @@
-import { SpeciesSerialized } from './serialization.models';
 import { CONFIG, GLOBALS } from './ml';
 import { Network } from './network';
+import { deserializeNetwork, SpeciesSerialized, StateSerialized } from './serialization.models';
 import { Species } from './species';
 
 // declare function postMessage(value?: any): any;
@@ -13,7 +13,28 @@ export class Runner {
 
     currentStep: number = 0;
 
-    constructor() {
+    init(state: StateSerialized) {
+        this.currentStep = state.step;
+        this.bestNetwork = deserializeNetwork(state.bestNetwork);
+
+        for (const speciesSerialized of state.speciesArray) {
+            const representantNetwork: Network = deserializeNetwork(speciesSerialized.representant);
+            const species: Species = new Species(representantNetwork);
+            species.networks.push(representantNetwork);
+            for (const networkSerialized of speciesSerialized.networks) {
+                species.networks.push(deserializeNetwork(networkSerialized));
+            }
+
+            species.averageFitness = speciesSerialized.averageFitness;
+            species.desiredPopulation = speciesSerialized.desiredPopulation;
+
+            this.speciesArray.push(species);
+        }
+
+        this.printResults();
+    }
+
+    initBasic() {
         const representantNetwork: Network = new Network();
         representantNetwork.initBasicNetwork();
 
@@ -30,7 +51,6 @@ export class Runner {
             newSpecies.networks.push(network);
         }
 
-        // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
         this.printResults();
     }
 
@@ -115,7 +135,7 @@ export class Runner {
             }
         }
 
-        if (this.currentStep % 50 === 0) {
+        if (this.currentStep % 500 === 0) {
             // postMessage([this.currentStep, this.bestNetwork, this.speciesArray]);
             this.printResults();
             console.log(this.currentStep);

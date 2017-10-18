@@ -145,6 +145,10 @@ function handleMLData(data: string) {
 
 if (process.env.AUTORUN) {
     setTimeout(() => {
+        if (running) {
+            return;
+        }
+
         readFile('build/data.txt', 'utf8', (err, data) => {
             if (err) {
                 console.error(err);

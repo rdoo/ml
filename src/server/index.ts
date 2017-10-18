@@ -1,8 +1,8 @@
-import { createWriteStream, readFile } from 'fs';
 import { ChildProcess, fork } from 'child_process';
 import { Express } from 'express';
 import * as express from 'express';
-import { createServer, Server } from 'http';
+import { createWriteStream, readFile } from 'fs';
+import { createServer, get, Server } from 'http';
 import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
 
@@ -141,4 +141,26 @@ function handleMLData(data: string) {
         const writer = createWriteStream('build/' + fileName);
         writer.write(data);
     }
+}
+
+if (process.env.AUTORUN) {
+    setTimeout(() => {
+        readFile('build/data.txt', 'utf8', (err, data) => {
+            if (err) {
+                console.error(err);
+            } else {
+                const parsedMessage: any = { options: { } };
+                parsedMessage.options.inputValue = data;
+                ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                running = true;
+            }
+        });
+    }, 30000); // 30 sekund
+}
+
+if (process.env.URL) {
+    setInterval(() => {
+        console.log('Anti-idler');
+        get(process.env.url);
+    }, 1500000); // 25 minut
 }

@@ -140,6 +140,9 @@ function handleMLData(data: string) {
     if (fileName) {
         const writer = createWriteStream('build/' + fileName);
         writer.write(data);
+    } else {
+        const writer = createWriteStream('build/data.txt'); // TODO
+        writer.write(data);
     }
 }
 

@@ -120,10 +120,20 @@ export class App extends React.Component {
         this.setState({ currentlyViewed: this.state.currentlyViewed });
     }
 
+    copyObjectAsString(object: any) {
+        const input: HTMLInputElement = document.createElement('input');
+        input.style.display = 'hidden';
+        input.value = JSON.stringify(object);
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+    }
+
     render() {
         return (
             <div>
-                {this.state.optionsOpened && <OptionsComponent running={this.state.running} config={this.config} options={this.options} onStart={() => this.start()} onStop={() => this.stop()} onHideOptionsComponent={() => this.setState({ optionsOpened: false })}></OptionsComponent>}
+                {this.state.optionsOpened && <OptionsComponent running={this.state.running} config={this.config} options={this.options} onStart={() => this.start()} onStop={() => this.stop()} onHideOptionsComponent={() => this.setState({ optionsOpened: false })} onCopyState={() => this.copyObjectAsString(this.state.mlState)}></OptionsComponent>}
                 <button disabled={this.state.running} onClick={() => this.start()}>START</button>
                 <button disabled={!this.state.running} onClick={() => this.pause()}>{this.state.paused ? 'UNPAUSE' : 'PAUSE'}</button>
                 <button disabled={!this.state.running} onClick={() => this.stop()}>STOP</button>
@@ -133,6 +143,7 @@ export class App extends React.Component {
                     <div>Species: {this.state.mlState.speciesArray.length} ({this.state.mlState.speciesArray.reduce((a, b) => a + b.networks.length, 0)})</div>
                     {this.state.mlState.speciesArray.map((species, i) => <div key={i}>{i} - {species.networks.length} - {species.desiredPopulation} - {species.averageFitness} - {species.networks[0].fitness}</div>)}
                     <button onClick={() => this.openCheckComponent(this.state.mlState.bestNetwork)}>SHOW</button>
+                    <button onClick={() => this.copyObjectAsString(this.state.mlState.bestNetwork)}>COPY</button>
                     <span>Best fitness: {this.state.mlState.bestNetwork.fitness}</span>
                     <CanvasComponent network={this.state.mlState.bestNetwork}></CanvasComponent>
                 </div>}
@@ -144,6 +155,7 @@ export class App extends React.Component {
                                 <button disabled={this.state.currentlyViewed[i] <= 0} onClick={() => this.setCurrentlyViewed(i, this.state.currentlyViewed[i] - 1)}>PREV</button>
                                 <button disabled={this.state.currentlyViewed[i] >= (species.networks.length - 1)} onClick={() => this.setCurrentlyViewed(i, this.state.currentlyViewed[i] + 1)}>NEXT</button>
                                 <button onClick={() => this.openCheckComponent(species.networks[this.state.currentlyViewed[i]])}>SHOW</button>
+                                <button onClick={() => this.copyObjectAsString(species.networks[this.state.currentlyViewed[i]])}>COPY</button>
                                 Actual networks: {species.networks.length} Desired: {species.desiredPopulation} Avg fitness: {species.averageFitness} This fitness: {species.networks[this.state.currentlyViewed[i]].fitness}
                             </div>
                             <CanvasComponent network={species.networks[this.state.currentlyViewed[i]]}></CanvasComponent>

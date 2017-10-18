@@ -9,6 +9,7 @@ interface OptionsProps {
     onStart: () => void;
     onStop: () => void;
     onHideOptionsComponent: () => void;
+    onCopyState: () => void;
 }
 
 export class OptionsComponent extends React.Component {
@@ -34,6 +35,7 @@ export class OptionsComponent extends React.Component {
             <div className="floating-container" onClick={event => event.stopPropagation()}>
                 <button disabled={this.props.running} onClick={this.props.onStart}>START</button>
                 <button disabled={!this.props.running} onClick={this.props.onStop}>STOP</button>
+                <button onClick={this.props.onCopyState}>COPY STATE</button>
                 <fieldset disabled={this.props.running}>
                     Networks #: <input defaultValue={String(this.props.config.networksNumber)} onKeyUp={event => this.props.config.networksNumber = Number((event.target as HTMLInputElement).value)} />
                     Culling %: <input defaultValue={String(this.props.config.cullingPercent)} onKeyUp={event => this.props.config.cullingPercent = Number((event.target as HTMLInputElement).value)} />

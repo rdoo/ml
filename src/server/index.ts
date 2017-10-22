@@ -3,10 +3,13 @@ import { Express } from 'express';
 import * as express from 'express';
 import { createWriteStream, readFile } from 'fs';
 import { createServer, get, Server } from 'http';
+import { Collection, MongoClient } from 'mongodb';
 import { join } from 'path';
 import { Server as webSocketServer } from 'uws';
 
 import { getStringDataFromFile, readFilenamesInDirectory, transformData } from '../data/generator';
+
+const MONGO_URL: string = process.env.MONGO_URL || '';
 
 const app: Express = express();
 app.use('/', express.static(join(__dirname, 'client')));
@@ -23,6 +26,7 @@ const inputData: any[] = [];
 const inputDataNames: string[] = [];
 let outputData: string;
 let fileName: string;
+let mongoName: string = '123';
 
 // readFilenamesInDirectory('src/data/dump').then(names => {
 //     const ticker: string = 'PZU';
@@ -94,16 +98,26 @@ wsServer.on('connection', ws => {
                     running = true;
                     ws.send('RU' + JSON.stringify({ running }));
                 } else if (parsedMessage.options.startMode === 'file') {
-                    readFile('build/' + fileName, 'utf8', (err, data) => {
-                        if (err) {
-                            console.error(err);
-                        } else {
-                            parsedMessage.options.inputValue = data;
+                    if (!IS_HEROKU) { // TODO usunac to i dac mongo do osobnego pola
+                        readFile('build/' + fileName, 'utf8', (err, data) => {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                parsedMessage.options.inputValue = data;
+                                ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                                running = true;
+                                ws.send('RU' + JSON.stringify({ running }));
+                            }
+                        });
+                    } else {
+                        getStateFromMongo().then(data => {
+                            parsedMessage.options.inputValue = data.data;
                             ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
                             running = true;
                             ws.send('RU' + JSON.stringify({ running }));
-                        }
-                    });
+                        });
+                    }
+
                 } else {
                     ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
                     running = true;
@@ -137,13 +151,53 @@ function handleMLData(data: string) {
     console.log('Data received from worker');
     wsServer.broadcast('ST' + data);
 
-    if (fileName) {
+    if (fileName && !IS_HEROKU) {
         const writer = createWriteStream('build/' + fileName);
         writer.write(data);
-    } else {
-        const writer = createWriteStream('build/data.txt'); // TODO
-        writer.write(data);
     }
+
+    if (IS_HEROKU) {
+		MongoClient.connect(MONGO_URL, (error, db) => {
+			if (error) {
+				console.error(error);
+			} else {
+				const collection: Collection = db.collection('ml');
+	
+                // collection.insert({ name: mongoName, data }, (error, result) => {
+                collection.replaceOne({ name: mongoName }, { name: mongoName, data }, (error, result) => {
+					if (error) {
+						console.error(error);
+					} else {
+						console.log('Succesfully inserted data');
+					}
+					db.close();
+				});
+			}
+		});
+    }
+}
+
+function getStateFromMongo(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        MongoClient.connect(MONGO_URL, (error, db) => {
+            if (error) {
+                console.error(error);
+            } else {
+                const collection: Collection = db.collection('ml');
+    
+                collection.findOne({ name: mongoName }, (error, result) => {
+                    if (error) {
+                        console.error(error);
+                        reject();
+                    } else {
+                        console.log('Result:');
+                        resolve(result);
+                    }
+                    db.close();
+                });
+            }
+        });
+    });
 }
 
 if (process.env.AUTORUN) {
@@ -151,17 +205,25 @@ if (process.env.AUTORUN) {
         if (running) {
             return;
         }
-
-        readFile('build/data.txt', 'utf8', (err, data) => {
-            if (err) {
-                console.error(err);
-            } else {
+        if (!IS_HEROKU) {
+            readFile('build/data.txt', 'utf8', (err, data) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    const parsedMessage: any = { options: { } };
+                    parsedMessage.options.inputValue = data;
+                    ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
+                    running = true;
+                }
+            });
+        } else {
+            getStateFromMongo().then(data => {
                 const parsedMessage: any = { options: { } };
-                parsedMessage.options.inputValue = data;
+                parsedMessage.options.inputValue = data.data;
                 ml.send(JSON.stringify({ configData: parsedMessage, inputData }));
                 running = true;
-            }
-        });
+            });
+        }
     }, 30000); // 30 sekund
 }
 
